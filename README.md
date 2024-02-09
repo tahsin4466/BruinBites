@@ -16,7 +16,6 @@ pip install flask
 
 Make sure to have Flask configured to:
  - Target the file `app.py`
- - Media/static folder set to `static`
  - Templates folder set to `templates`
    
 Then, download this repository. Run `app.py`, and you will see a localhost IP pop up in the terminal. Press the link to open the application in your browser.
