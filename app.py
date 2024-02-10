@@ -1,12 +1,13 @@
 import flask
-from flask import Flask
+from flask import Flask, send_from_directory
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='client/build', static_url_path='')
 
 
 @app.route('/')
 def hello_world():  # put application's code here
-    return flask.render_template('main.html')
+
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 if __name__ == '__main__':
