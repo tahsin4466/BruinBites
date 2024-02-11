@@ -14,9 +14,7 @@ This project requires Flask: a back-end framework for creating web applications.
 pip install flask
 ```
 
-Make sure to have Flask configured to:
- - Target the file `app.py`
- - Templates folder set to `templates`
+Make sure to have Flask configured to target the file `app.py`.
 
 This project also uses React. Once node.js is installed, use npm to build the React app using:
 
