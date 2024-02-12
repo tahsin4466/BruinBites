@@ -3,7 +3,7 @@
 ## Overview
 This is a web application that helps UCLA students find the best eats on campus! Users will be able to create an account with UCLA SSO, rate their favorite places and interact with other students' feedback for all dining establishments. Live data will also be pulled from menu.dining.ucla.edu for a one stop place for all dining info.
 
-This project is being built using a Flask backend and a React front end with Bootstrap 4 CSS. A MySQL server hosted on AWS will faciliate dynamic data storage and retrieval. It is part of a collaborative project for CS35L - Software Construction.
+This project is being built using a Flask backend and a React front end with MUI. A MySQL server hosted on AWS will faciliate dynamic data storage and retrieval. It is part of a collaborative project for CS35L - Software Construction.
 
 ## Installation
 Make sure you have the latest version of Python installed (preferabbly 3.12+). You will also need to install node.js on your machine for access to npm.
