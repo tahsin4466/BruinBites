@@ -16,6 +16,21 @@ pip install flask
 
 Make sure to have Flask configured to target the file `app.py`.
 
+Additionally, this project uses Selenium: a Python framework for browser automation. For this project, we will use this library to scrape data from the UCLA dining page. 
+Again, using pip, run:
+
+```
+pip install selenium
+```
+
+then install the webdriver similarly:
+
+```
+pip install webdriver-manager
+```
+
+If you have a Liux operating system, use `pip3` instead of `pip` to install the above.
+
 This project also uses React. Once node.js is installed, use npm to first install any dependencies (such as MUI) using:
 ```
 npm install
