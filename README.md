@@ -29,7 +29,7 @@ then install the webdriver similarly:
 pip install webdriver-manager
 ```
 
-If you have a Liux operating system, use `pip3` instead of `pip` to install the above.
+If you have a Linux operating system, use `pip3` instead of `pip` to install the above.
 
 This project also uses React. Once node.js is installed, use npm to first install any dependencies (such as MUI) using:
 ```
