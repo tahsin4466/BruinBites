@@ -13,8 +13,18 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
 import SearchIcon from '@mui/icons-material/Search';
+
+//Icon imports
+import FastfoodIcon from '@mui/icons-material/Fastfood';
+import EmojiFoodBeverageIcon from '@mui/icons-material/EmojiFoodBeverage';
+import DinnerDiningIcon from '@mui/icons-material/DinnerDining';
+import IcecreamIcon from '@mui/icons-material/Icecream';
+import RiceBowlIcon from '@mui/icons-material/RiceBowl';
+import LocalPizzaIcon from '@mui/icons-material/LocalPizza';
+import RamenDiningIcon from '@mui/icons-material/RamenDining';
+import BakeryDiningIcon from '@mui/icons-material/BakeryDining';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -62,6 +72,31 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const pages = ['Home', 'Dining', 'Leaderboard'];
 const settings = ['Profile', 'Logout'];
 
+function Logo() {
+    let selector = Math.floor(Math.random() * 8);
+
+    switch (selector) {
+      case 0:
+        return <FastfoodIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      case 1:
+        return <EmojiFoodBeverageIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      case 2:
+        return <DinnerDiningIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      case 3:
+        return <IcecreamIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      case 4:
+        return <RiceBowlIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      case 5:
+        return <LocalPizzaIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      case 6:
+        return <RamenDiningIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      case 7:
+        return <BakeryDiningIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+      default:
+        return <RestaurantIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+    }
+}
+
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -85,7 +120,7 @@ function ResponsiveAppBar() {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          <Logo></Logo>
           <Typography
             variant="h6"
             noWrap
@@ -140,7 +175,7 @@ function ResponsiveAppBar() {
               ))}
             </Menu>
           </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+          <EmojiFoodBeverageIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
             variant="h5"
             noWrap

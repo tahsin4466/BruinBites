@@ -7,8 +7,7 @@ CORS(app)
 
 
 @app.route('/')
-def hello_world():  # put application's code here
-
+def home():
     return send_from_directory(app.static_folder, 'index.html')
 
 
