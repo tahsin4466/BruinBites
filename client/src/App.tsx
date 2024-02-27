@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Home from './pages/Home';
+import LoginPage from "./pages/Login";
 
 interface ApiResponse {
   message: string;
@@ -33,14 +34,7 @@ function App() {
   };
 
   return (
-    <div>
-      {data ? (
-        <p>{data.message}</p>
-      ) : (
-        <p>Loading...</p>
-      )}
-      <button onClick={handleSubmit}>Submit Data</button>
-    </div>
+    <LoginPage/>
   );
 }
 

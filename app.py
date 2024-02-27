@@ -21,6 +21,16 @@ def submit_data():
     return jsonify({'message': 'Data received successfully!'})
 
 
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+    # Implement authentication logic here
+    if username == 'valid_username' and password == 'valid_password':
+        return jsonify({'message': 'Login successful'})
+    else:
+        return jsonify({'message': 'Invalid credentials'}), 401
 
 
 @app.route('/')
@@ -53,4 +63,12 @@ def submit_data():
 if __name__ == '__main__':
     app.run(debug=True)
 
+'''
+
+
+'''
+By implementing these changes, your login.tsx component will be able to communicate with the
+Flask backend to authenticate users. Remember to replace 'valid_username' and 'valid_password' 
+with actual credentials validation logic in your Flask backend. Additionally, make sure to handle 
+user authentication securely, such as by using encryption for passwords.
 '''
