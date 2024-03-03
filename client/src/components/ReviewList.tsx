@@ -65,8 +65,6 @@ const reviews: Review[] = [
     title: "Great for Vegetarians",
     rating: 4.5,
     thumbnailUrls: [
-      "https://lh3.googleusercontent.com/proxy/hDnrJjz_DgSA2w80wvjj4j_1MkER_Jo26rCl_GEPzn_t3yV2ndcbqTQu-EAy_vxs27CD8tf4NHhebo6RRmi-x4S3rNVdGvlmWpbREqBIm61wsZQWRlnEHJ1dxQ106DN5e5YPgOWxj1LVDL82",
-      "https://fastly.4sqi.net/img/general/600x600/12722721_lvjbKcQm3HmCz8s_iWeGv0HU5H4qlbLjxizwjioBgh8.jpg",
     ],
     userProfilePhoto: "https://example.com/user7.jpg",
     userName: "George Huang",
@@ -78,7 +76,7 @@ const reviews: Review[] = [
 
 const ReviewsList: React.FC = () => {
   return (
-    <Container maxWidth="md" sx={{ overflowY: 'auto', height: 'calc(100vh - 64px)', py: 4 }}>
+    <Container maxWidth="md" sx={{ overflowY: 'auto', height: '90vh', py: 4 }}>
       <Grid container spacing={2}>
         {reviews.map((review, index) => (
           <Grid item key={index} xs={12}>

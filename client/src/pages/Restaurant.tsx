@@ -1,39 +1,40 @@
 import React, { useState } from 'react';
-import { Box, SwipeableDrawer, Typography, Tab, Tabs, AppBar, Toolbar, Fab, Grid, Paper, useTheme, useMediaQuery } from '@mui/material';
+import { Box, SwipeableDrawer, Typography, Fab, Grid, Paper, useTheme, useMediaQuery, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import ReviewList from '../components/ReviewList'; // Adjust import path as necessary
+import CloseIcon from '@mui/icons-material/Close'; // Importing Close icon
+import ReviewList from '../components/ReviewList';
 import HeaderMenu from "../components/HeaderMenu";
 import { styled } from '@mui/material/styles';
-
-const AppBarStyled = styled(AppBar)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
-  backgroundColor: theme.palette.secondary.main, // Changed color for contrast
-}));
-
-const TabsContainer = styled('div')(({ theme }) => ({
-  flexGrow: 1,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-}));
+import RestaurantContent from "../components/RestaurantContent";
 
 const MainContent = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   textAlign: 'center',
-  height: '100vh', // Full viewport height
+  height: 'calc(100vh - 64px)', // Adjust the height to consider the AppBar height if there is one
   overflowY: 'auto',
+  backgroundColor: 'white', // Set background color to white
+}));
+
+const ReviewsContent = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  textAlign: 'center',
+  height: 'calc(100vh - 64px)', // Adjust the height to consider the AppBar height
+  overflowY: 'auto',
+  boxShadow: '-2px 0px 5px rgba(0, 0, 0, 0.2)', // This adds a drop shadow to the left side
+  backgroundColor: theme.palette.grey[300], // Slightly darker background for the right column
 }));
 
 const DrawerContent = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
   width: 'auto',
   textAlign: 'center',
-  height: '100vh', // Full screen height for mobile
+  height: '100vh',
   overflowY: 'auto',
+  position: 'relative', // For the close button positioning
 }));
 
 const TitleTypography = styled(Typography)({
-  fontFamily: 'monospace', // Monospace font for titles
+  fontFamily: 'monospace',
   fontWeight: 'bold',
 });
 
@@ -47,41 +48,25 @@ const Restaurant = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
 
   const toggleDrawer = (open: boolean) => {
     setDrawerOpen(open);
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   return (
     <>
-      <HeaderMenu />
-      <AppBarStyled position="static">
-        <Toolbar>
-          <TitleTypography variant="h5">Restaurant Info</TitleTypography>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="Restaurant info tabs" textColor="inherit" indicatorColor="secondary" sx={{ marginLeft: 'auto' }}>
-            <Tab label="Info" />
-            <Tab label="Menu" />
-            <Tab label="Hours" />
-            <Tab label="Pictures" />
-          </Tabs>
-        </Toolbar>
-      </AppBarStyled>
-      <Grid container spacing={2}>
+      <HeaderMenu/>
+      <Grid container spacing={0}> {/* Set spacing to 0 to remove padding between columns */}
         <Grid item xs={12} md={8}>
           <MainContent>
-            {/* Content based on tabValue */}
+            <RestaurantContent/>
           </MainContent>
         </Grid>
         <Grid item md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <MainContent>
-            <TitleTypography variant="h5">Reviews</TitleTypography>
+          <ReviewsContent>
+            <TitleTypography variant="h4">Reviews</TitleTypography>
             <ReviewList />
-          </MainContent>
+          </ReviewsContent>
         </Grid>
       </Grid>
       {isMobile && (
@@ -91,7 +76,10 @@ const Restaurant = () => {
       )}
       <SwipeableDrawer anchor="bottom" open={drawerOpen} onClose={() => toggleDrawer(false)} onOpen={() => toggleDrawer(true)} ModalProps={{ keepMounted: true }}>
         <DrawerContent>
-          <TitleTypography variant="h5" style={{ position: 'sticky', top: 0, backgroundColor: theme.palette.background.paper, zIndex: 1, textAlign: 'center' }}>
+          <IconButton onClick={() => toggleDrawer(false)} style={{ position: 'absolute', right: 0, top: 0 }}>
+            <CloseIcon />
+          </IconButton>
+          <TitleTypography variant="h5" style={{ paddingTop: '32px' }}> {/* Add padding to account for the close button */}
             Reviews
           </TitleTypography>
           <ReviewList />
