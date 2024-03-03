@@ -14,6 +14,8 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import SearchIcon from '@mui/icons-material/Search';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+
 
 //Icon imports
 import FastfoodIcon from '@mui/icons-material/Fastfood';
@@ -100,6 +102,7 @@ function Logo() {
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const navigate = useNavigate(); //to the top
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -115,6 +118,19 @@ function ResponsiveAppBar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+
+  const handleMenuItemClick = (setting: string) => {
+    console.log('handleMenuItemClick function called with setting:', setting);
+    handleCloseUserMenu(); // Always close the menu after clicking a menu item
+    if (setting === 'Logout') {
+      console.log('Logging out...');
+      // If the user clicks on "Logout", navigate to the login page
+      navigate('/login'); // Invoke navigation to the login page
+    }
+  };
+
+
 
   return (
     <AppBar position="static">

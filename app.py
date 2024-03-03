@@ -41,31 +41,6 @@ def home():
 if __name__ == '__main__':
     app.run()
 
-
-'''
-from flask import Flask, jsonify, request
-
-app = Flask(__name__)
-
-# Example route to receive GET requests from React
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    data = {'message': 'Hello from Flask API!'}
-    return jsonify(data)
-
-# Example route to receive POST requests from React
-@app.route('/api/submit', methods=['POST'])
-def submit_data():
-    data = request.json  # Assuming JSON data is sent from React
-    # Process the received data
-    return jsonify({'message': 'Data received successfully!'})
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-'''
-
-
 '''
 By implementing these changes, your login.tsx component will be able to communicate with the
 Flask backend to authenticate users. Remember to replace 'valid_username' and 'valid_password' 
