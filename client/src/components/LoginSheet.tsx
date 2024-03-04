@@ -17,15 +17,20 @@ const defaultTheme = createTheme();
 
 type LoginSheetProps = {
   onToggleForm: () => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; // Add onSubmit prop
+  setUsername: React.Dispatch<React.SetStateAction<string>>; // Add setUsername prop
+  setPassword: React.Dispatch<React.SetStateAction<string>>; // Add setPassword prop
 };
+
 export default function SignIn(props: LoginSheetProps) {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  // Function to handle username input change
+  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    props.setUsername(event.target.value); // Update username state
+  };
+
+  // Function to handle password input change
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    props.setPassword(event.target.value); // Update password state
   };
 
   return (
@@ -46,16 +51,17 @@ export default function SignIn(props: LoginSheetProps) {
           <Typography component="h1" variant="h5">
             Log in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={props.onSubmit} noValidate sx={{ mt: 1 }}> {/* Use onSubmit prop */}
             <TextField
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              id="username" // Change id to "username"
+              label="Username" // Change label to "Username"
+              name="username" // Change name to "username"
+              autoComplete="username" // Change autoComplete to "username"
               autoFocus
+              onChange={handleUsernameChange} // Handle username change
             />
             <TextField
               margin="normal"
@@ -66,6 +72,7 @@ export default function SignIn(props: LoginSheetProps) {
               type="password"
               id="password"
               autoComplete="current-password"
+              onChange={handlePasswordChange} // Handle password change
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}

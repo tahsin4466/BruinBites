@@ -14,6 +14,8 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import SearchIcon from '@mui/icons-material/Search';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+
 
 //Icon imports
 import FastfoodIcon from '@mui/icons-material/Fastfood';
@@ -100,6 +102,7 @@ function Logo() {
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const navigate = useNavigate(); //to the top
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -115,6 +118,39 @@ function ResponsiveAppBar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+
+  // Function to handle clicks on pages menu items
+  const handlePageMenuItemClick = (page: string) => {
+    handleCloseNavMenu(); // Close the menu after clicking a menu item
+    console.log('Navigating to:', page);
+    if (page === 'Home') {
+      navigate('/');
+    }
+    else if (page === 'Dining') {
+      navigate('/search')
+    }
+    else{
+      navigate(`/${page.toLowerCase()}`); // Assuming the page routes follow the pattern '/<pagename>'
+    }
+  };
+
+// Function to handle clicks on settings menu items
+  const handleSettingMenuItemClick = (setting: string) => {
+    console.log('handleMenuItemClick function called with setting:', setting);
+    handleCloseUserMenu(); // Always close the menu after clicking a menu item
+    if (setting === 'Logout') {
+      console.log('Logging out...');
+      // If the user clicks on "Logout", navigate to the login page
+      navigate('/login'); // Invoke navigation to the login page
+    }
+    else if (setting === 'Profile') {
+      console.log('to the profile!!');
+      navigate('/profile'); // Invoke navigation to the profile page
+    }
+  };
+
+
 
   return (
     <AppBar position="static">
@@ -169,7 +205,7 @@ function ResponsiveAppBar() {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
+                <MenuItem key={page} onClick={() => handlePageMenuItemClick(page)}>
                   <Typography textAlign="center">{page}</Typography>
                 </MenuItem>
               ))}
@@ -197,7 +233,7 @@ function ResponsiveAppBar() {
             {pages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={() => handlePageMenuItemClick(page)}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {page}
@@ -238,7 +274,7 @@ function ResponsiveAppBar() {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem key={setting} onClick={() => handleSettingMenuItemClick(setting)}>
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
               ))}
