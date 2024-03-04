@@ -5,13 +5,18 @@ import {
 } from '@mui/material';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CreateIcon from '@mui/icons-material/Create'; // Ensure CreateIcon is imported here
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
 const CombinedContent: React.FC = () => {
-  const [imageUrls, setImageUrls] = useState<string[]>([
+  // State for the original restaurant images
+  const [restaurantImageUrls, setRestaurantImageUrls] = useState<string[]>([
     'https://source.unsplash.com/collection/827743/1',
     'https://source.unsplash.com/collection/827743/2',
     'https://source.unsplash.com/collection/827743/3',
   ]);
+
+  // State for the review images
+  const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
   const [openGallery, setOpenGallery] = useState(false);
   const [review, setReview] = useState({ title: '', content: '', rating: 2 });
 
@@ -26,6 +31,13 @@ const CombinedContent: React.FC = () => {
     setReview({ ...review, rating: newValue ?? review.rating });
   };
 
+  const handleReviewImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const newImageUrl = URL.createObjectURL(event.target.files[0]);
+      setReviewImageUrls([...reviewImageUrls, newImageUrl]);
+    }
+  };
+
   const handleReviewSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // Submission logic goes here
@@ -33,6 +45,8 @@ const CombinedContent: React.FC = () => {
 
   return (
     <Box p={2} sx={{ overflowY: 'auto' }}>
+
+      {/* ... other components ... */}
 
       <Typography align="left" variant="h2" style={{ fontWeight: 'bold', fontFamily: 'monospace' }} >
         Bruin Plate
@@ -44,7 +58,7 @@ const CombinedContent: React.FC = () => {
       <Typography variant="h5">‎</Typography>
       {/* Thumbnails and button to open gallery */}
       <Grid container spacing={2} justifyContent="space-between" alignItems="center" sx={{ width: '100%', marginBottom: '16px' }}>
-        {imageUrls.slice(0, 3).map((url, index) => (
+        {restaurantImageUrls.slice(0, 3).map((url, index) => (
           <Grid item xs key={index} sx={{ maxWidth: 'calc(33.3333% - 16px)' }}>
             <img
               src={url}
@@ -70,7 +84,7 @@ const CombinedContent: React.FC = () => {
         <DialogTitle>All Images</DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
-            {imageUrls.map((url, index) => (
+            {restaurantImageUrls.map((url, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <img
                   src={url}
@@ -134,8 +148,6 @@ const CombinedContent: React.FC = () => {
       {/* "Write a review" section */}
       <Box sx={{
         display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'flex-start',
         boxShadow: 3,
         borderRadius: '40px',
         p: 2,
@@ -152,13 +164,24 @@ const CombinedContent: React.FC = () => {
           <Typography paragraph sx={{ mb: 2 }}>
             Tell us your thoughts about this place.
           </Typography>
-          <Rating
-            name="rating"
-            value={review.rating}
-            onChange={handleRatingChange}
-            size="large"
-            sx={{ mb: 2 }} // Maintain spacing below the rating
-          />
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Rating
+              name="rating"
+              value={review.rating}
+              onChange={handleRatingChange}
+              size="large"
+              sx={{ mb: 2 }} // Maintain spacing below the rating
+            />
+            <IconButton color="primary" component="label">
+              <AddAPhotoIcon />
+              <input
+                type="file"
+                hidden
+                accept="image/jpeg,image/png,image/gif"
+                onChange={handleReviewImageChange}
+              />
+            </IconButton>
+          </Stack>
           <Box component="form" onSubmit={handleReviewSubmit} noValidate sx={{ width: '100%' }}>
             <TextField
               name="title"
@@ -182,6 +205,17 @@ const CombinedContent: React.FC = () => {
               Submit Review
             </Button>
           </Box>
+          <Grid container spacing={1} sx={{ mt: 1 }}>
+            {reviewImageUrls.map((url, index) => (
+              <Grid item key={index}>
+                <img
+                  src={url}
+                  alt={`Review Image ${index + 1}`}
+                  style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px' }}
+                />
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       </Box>
 
