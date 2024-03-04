@@ -6,7 +6,7 @@ import LoginPage from "./pages/Login";
 import Leaderboard from './pages/Leaderboard'; // Adjust the path based on the actual location of your 'Leaderboard' component
 import Search from './pages/Search'; // Adjust the path based on the actual location of your 'Leaderboard' component
 import User from './pages/User'; // Adjust the path based on the actual location of your 'Leaderboard' component
-
+import Restaurant from './pages/Restaurant';
 
 interface ApiResponse {
   message: string;
@@ -44,7 +44,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Home />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/search" element={<Search />} />
+        <Route path="/restaurant" element={<Restaurant />} />
         <Route path="/profile" element={<User />} />
 
 
