@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Typography, Box, Grid, Button, Dialog, IconButton, DialogTitle, DialogContent, DialogActions,
-  TextField, Rating, Stack
+  TextField, Rating, Stack, Tab, Tabs
 } from '@mui/material';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CreateIcon from '@mui/icons-material/Create';
@@ -15,6 +15,51 @@ interface MealPeriod {
 interface RestaurantHours {
   [key: string]: MealPeriod;
 }
+
+interface MenuItem {
+  name: string;
+  price: string;
+}
+
+interface SubMenu {
+  name: string;
+  items: MenuItem[];
+}
+
+const subMenus: SubMenu[] = [
+  {
+    name: "Starters",
+    items: [
+      { name: "Soup of the day", price: "$5" },
+      { name: "Bruschetta", price: "$7" },
+      // ... other starters
+    ],
+  },
+  {
+    name: "Main Courses",
+    items: [
+      { name: "Steak", price: "$20" },
+      { name: "Salmon", price: "$18" },
+      // ... other main courses
+    ],
+  },
+  {
+    name: "Main Courses",
+    items: [
+      { name: "Steak", price: "$20" },
+      { name: "Salmon", price: "$18" },
+      // ... other main courses
+    ],
+  },
+    {
+    name: "Main Courses",
+    items: [
+      { name: "Steak", price: "$20" },
+      { name: "Salmon", price: "$18" },
+      // ... other main courses
+    ],
+  },
+];
 
 const restaurantHours: RestaurantHours = {
   "Breakfast": {"start": "08:00", "end": "11:00"},
@@ -124,6 +169,12 @@ const CombinedContent: React.FC = () => {
     // Submission logic goes here
   };
 
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue);
+  };
+
   return (
     <Box p={2} sx={{ overflowY: 'auto' }}>
 
@@ -164,7 +215,7 @@ const CombinedContent: React.FC = () => {
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle><strong>All Images</strong></DialogTitle>
+        <DialogTitle style={{fontFamily: 'monospace'}}><strong>All User Images</strong></DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
             {restaurantImageUrls.map((url, index) => (
@@ -185,25 +236,52 @@ const CombinedContent: React.FC = () => {
 
         {/* Grid container with adjusted spacing and flexWrap */}
       <Grid container spacing={2}>
-        {/* Menu Section taking up twice as much space as the Hours section on desktop */}
-        <Grid item xs={12} md={8}>
-          <Box
-            sx={{
-              p: 2,
-              boxShadow: 3,
-              borderRadius: '40px',
-              marginBottom: { xs: 2, md: 0 }, // Adjust bottom margin for responsiveness
-            }}
+        {/* Menu Section with tabs */}
+      <Grid item xs={12} md={7}>
+        <Box
+          sx={{
+            p: 2,
+            boxShadow: 3,
+            borderRadius: '40px',
+            marginBottom: { xs: 2, md: 0 },
+          }}
+        >
+          <Typography style={{ fontWeight: 'bold', fontFamily: 'monospace' }} variant="h4" gutterBottom>
+            Menu
+          </Typography>
+          <Tabs
+            value={selectedTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
           >
-            <Typography style={{ fontWeight: 'bold', fontFamily: 'monospace' }} variant="h4" gutterBottom>
-              Menu
-            </Typography>
-            <Typography paragraph>This is placeholder content for the menu.</Typography>
-          </Box>
-        </Grid>
+            {subMenus.map((submenu, index) => (
+              <Tab label={submenu.name} key={index} />
+            ))}
+          </Tabs>
+          {subMenus.map((submenu, index) => (
+            <Box
+              role="tabpanel"
+              hidden={selectedTab !== index}
+              key={index}
+              sx={{ paddingTop: '16px' }}
+            >
+              {selectedTab === index && (
+                <Grid container spacing={2}>
+                  {submenu.items.map((item, itemIndex) => (
+                    <Grid item xs={12} key={itemIndex}>
+                      <Typography sx={{p: 2}} align="left" variant="h6"><strong>{item.name}</strong> - {item.price}</Typography>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Box>
+          ))}
+        </Box>
+      </Grid>
 
         {/* Hours Section */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={5}>
           <Box
             sx={{
               p: 2,
