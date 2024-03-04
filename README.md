@@ -29,11 +29,23 @@ then install the webdriver similarly:
 pip install webdriver-manager
 ```
 
+finally, install flask-cors:
+
+```
+pip install flask-cors
+```
+
 If you have a Linux operating system, use `pip3` instead of `pip` to install the above.
 
 This project also uses React and is written in TypeScript. Once node.js is installed, use npm to first install any dependencies (such as MUI) using:
 ```
 npm install
+```
+Please make sure your directory is set to the CLIENT folder in the repository, or npm install will not work!
+If you have any errors, you can also use:
+
+```
+npm install --force
 ```
 
 Then, build the front-end using:

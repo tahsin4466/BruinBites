@@ -38,11 +38,5 @@ def home():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
-'''
-By implementing these changes, your login.tsx component will be able to communicate with the
-Flask backend to authenticate users. Remember to replace 'valid_username' and 'valid_password' 
-with actual credentials validation logic in your Flask backend. Additionally, make sure to handle 
-user authentication securely, such as by using encryption for passwords.
-'''
