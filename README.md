@@ -41,6 +41,12 @@ This project also uses React and is written in TypeScript. Once node.js is insta
 ```
 npm install
 ```
+Please make sure your directory is set to the CLIENT folder in the repository, or npm install will not work!
+If you have any errors, you can also use:
+
+```
+npm install --force
+```
 
 Then, build the front-end using:
 ```
