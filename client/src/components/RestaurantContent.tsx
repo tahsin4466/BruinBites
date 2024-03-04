@@ -1,24 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography, Box, Grid, Button, Dialog, IconButton, DialogTitle, DialogContent, DialogActions,
-  TextField, Rating, Stack // Ensure Stack is imported here
+  TextField, Rating, Stack
 } from '@mui/material';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
-import CreateIcon from '@mui/icons-material/Create'; // Ensure CreateIcon is imported here
+import CreateIcon from '@mui/icons-material/Create';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
+interface MealPeriod {
+  start: string;
+  end: string;
+}
+
+interface RestaurantHours {
+  [key: string]: MealPeriod;
+}
+
+const restaurantHours: RestaurantHours = {
+  "Breakfast": {"start": "08:00", "end": "11:00"},
+  "Lunch": {"start": "12:00", "end": "14:00"},
+  "Dinner": {"start": "18:00", "end": "21:00"},
+  "Late Hours": {"start": "22:00", "end": "24:00"}
+};
+
+const isCurrentTimeWithin = (start: string, end: string): boolean => {
+  const currentTime = new Date();
+  const startTime = new Date(currentTime);
+  const endTime = new Date(currentTime);
+  startTime.setHours(parseInt(start.split(':')[0]), parseInt(start.split(':')[1]), 0);
+  endTime.setHours(parseInt(end.split(':')[0]), parseInt(end.split(':')[1]), 0);
+  return currentTime >= startTime && currentTime <= endTime;
+};
+
+const findNextMealPeriod = (): { nextMeal: string; startTime: string } => {
+  const currentTime = new Date();
+  const sortedMeals = Object.entries(restaurantHours).sort((a, b) => {
+    const aStart = a[1].start.split(':');
+    const bStart = b[1].start.split(':');
+    return new Date().setHours(parseInt(aStart[0]), parseInt(aStart[1])) - new Date().setHours(parseInt(bStart[0]), parseInt(bStart[1]));
+  });
+  for (let [meal, {start}] of sortedMeals) {
+    const mealStartTime = new Date();
+    mealStartTime.setHours(parseInt(start.split(':')[0]), parseInt(start.split(':')[1]), 0);
+    if (currentTime < mealStartTime) {
+      return { nextMeal: meal, startTime: start };
+    }
+  }
+  return { nextMeal: sortedMeals[0][0], startTime: sortedMeals[0][1].start };
+};
+
 const CombinedContent: React.FC = () => {
-  // State for the original restaurant images
   const [restaurantImageUrls, setRestaurantImageUrls] = useState<string[]>([
     'https://source.unsplash.com/collection/827743/1',
     'https://source.unsplash.com/collection/827743/2',
     'https://source.unsplash.com/collection/827743/3',
+      'https://source.unsplash.com/collection/827743/4',
+      'https://source.unsplash.com/collection/827743/5',
+      'https://source.unsplash.com/collection/827743/6',
+      'https://source.unsplash.com/collection/827743/7',
+      'https://source.unsplash.com/collection/827743/8',
+      'https://source.unsplash.com/collection/827743/9',
+      'https://source.unsplash.com/collection/827743/10',
+      'https://source.unsplash.com/collection/827743/11',
   ]);
 
-  // State for the review images
   const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
   const [openGallery, setOpenGallery] = useState(false);
   const [review, setReview] = useState({ title: '', content: '', rating: 2 });
+  const [currentMeal, setCurrentMeal] = useState<string>('');
+  const [restaurantStatus, setRestaurantStatus] = useState<string>('Closed');
+  const [nextOpeningTime, setNextOpeningTime] = useState<string>('');
+
+  useEffect(() => {
+    const updateStatusAndMeal = () => {
+      let foundCurrentMeal = false;
+      let status = 'Closed';
+      let nextOpening = '';
+
+      Object.entries(restaurantHours).forEach(([meal, { start, end }]) => {
+        if (isCurrentTimeWithin(start, end)) {
+          setCurrentMeal(meal);
+          status = 'Open';
+          foundCurrentMeal = true;
+        }
+      });
+
+      if (!foundCurrentMeal) {
+        const nextMealInfo = findNextMealPeriod();
+        setCurrentMeal('');
+        nextOpening = `Closed. Opens at ${nextMealInfo.startTime} for ${nextMealInfo.nextMeal}`;
+      }
+
+      setRestaurantStatus(status);
+      setNextOpeningTime(nextOpening);
+    };
+
+    updateStatusAndMeal();
+    const interval = setInterval(updateStatusAndMeal, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleOpenGallery = () => setOpenGallery(true);
   const handleCloseGallery = () => setOpenGallery(false);
@@ -46,12 +127,14 @@ const CombinedContent: React.FC = () => {
   return (
     <Box p={2} sx={{ overflowY: 'auto' }}>
 
-      {/* ... other components ... */}
-
+      {/* Updated restaurant status display */}
       <Typography align="left" variant="h2" style={{ fontWeight: 'bold', fontFamily: 'monospace' }} >
         Bruin Plate
       </Typography>
-      <Typography style={{ fontFamily: 'monospace'}} align="left" variant="h6" gutterBottom>Closed. Opens 5pm</Typography>
+      <Typography style={{ fontFamily: 'monospace', color: restaurantStatus === 'Open' ? 'green' : 'red' }} align="left" variant="h6" gutterBottom>
+        {restaurantStatus === 'Open' ? `Open till ${restaurantHours[currentMeal]?.end} for ${currentMeal}` : nextOpeningTime}
+      </Typography>
+
       <Typography align="left" variant="h5">
         Dining venue at UCLA emphasizing health-oriented dishes made with local & sustainable ingredients
       </Typography>
@@ -81,7 +164,7 @@ const CombinedContent: React.FC = () => {
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>All Images</DialogTitle>
+        <DialogTitle><strong>All Images</strong></DialogTitle>
         <DialogContent>
           <Grid container spacing={2}>
             {restaurantImageUrls.map((url, index) => (
@@ -129,15 +212,19 @@ const CombinedContent: React.FC = () => {
             }}
           >
             <Typography style={{ fontWeight: 'bold', fontFamily: 'monospace' }} variant="h4" gutterBottom>
-              Hours
+              Today's Hours
             </Typography>
-            <Typography variant="h6"><strong>Monday: </strong>7am - 9pm</Typography>
-            <Typography variant="h6"><strong>Tuesday: </strong>7am - 9pm</Typography>
-            <Typography variant="h6"><strong>Wednesday: </strong>7am - 9pm</Typography>
-            <Typography variant="h6"><strong>Thursday: </strong>7am - 9pm</Typography>
-            <Typography variant="h6"><strong>Friday: </strong>7am - 9pm</Typography>
-            <Typography variant="h6"><strong>Saturday: </strong>7am - 9pm</Typography>
-            <Typography variant="h6"><strong>Sunday: </strong>7am - 9pm</Typography>
+            {Object.entries(restaurantHours).map(([meal, { start, end }]) => (
+              <Typography
+                variant="h6"
+                key={meal}
+                style={{
+                  color: currentMeal === meal ? '#4caf50' : 'inherit', // Highlight current meal in green
+                }}
+              >
+                <strong>{meal}: </strong>{start} - {end}
+              </Typography>
+            ))}
           </Box>
         </Grid>
       </Grid>
