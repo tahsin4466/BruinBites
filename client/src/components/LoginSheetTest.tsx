@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+ import { useEffect } from 'react';
 
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
@@ -125,7 +125,7 @@ const signOut = () => {
             </Button>
             {/* Google Sign-In button */}
             <GoogleLogin
-              clientId="YOUR_CLIENT_ID.apps.googleusercontent.com" // Replace with your Google Client ID
+              clientId="1032108831904-nu6qkm5g3m3ghc9p3g2340bc9thcaaed.apps.googleusercontent.com" // Replace with your Google Client ID
               buttonText="Login with Google"
               onSuccess={responseGoogle}
               onFailure={handleFailure}
