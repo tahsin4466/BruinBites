@@ -4,7 +4,7 @@ gapi.load('auth2', function()
 {
     gapi.auth2.init(
     {
-      client_id: 'bruinbites-416305.apps.googleusercontent.com'
+      client_id: '1032108831904-nu6qkm5g3m3ghc9p3g2340bc9thcaaed.apps.googleusercontent.com'
     });
   });
   
