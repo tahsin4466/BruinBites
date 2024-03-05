@@ -40,10 +40,29 @@ export default function SignIn(props: LoginSheetProps) {
   };
 
   // Handle Google Sign-In success
-  const responseGoogle = (response: any) => {
-    console.log('Google profile', response.profileObj);
-    // Perform actions after successful Google Sign-In, e.g., setting user state or redirecting
-  };
+const responseGoogle = (response: any) => {
+  const profile = response.profileObj;
+  console.log('Google profile', profile);
+  // Check if the email domain is @ucla.edu
+  if (profile.email.endsWith('@ucla.edu')) {
+    console.log('Authenticated UCLA user:', profile.email);
+    // Proceed with your sign-in process, such as setting user state or redirecting
+  } else {
+    console.log('Non-UCLA email detected. Access denied.');
+    // Optionally, you can notify the user they must use a UCLA email
+    // You might also want to sign the user out immediately if they're not authorized
+    signOut();
+  }
+};
+
+// Add the signOut function if it's not already defined
+const signOut = () => {
+  const auth2 = window.gapi.auth2.getAuthInstance();
+  auth2.signOut().then(function () {
+    console.log('User signed out.');
+  });
+};
+
 
   // Handle Google Sign-In failure
   const handleFailure = (error: any) => {
