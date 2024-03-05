@@ -35,22 +35,24 @@ function Search() {
               {[1, 2, 3].map((result) => (
                 <Grid item key={result} xs={12} md={5.5} lg={5.5}>
                   <Card>
-                    <CardContent>
-                      {/* Placeholder content */}
-                      <Typography variant="h6">Restaurant Name</Typography>
-                      {/* Display review as stars */}
-                      <Box component="fieldset" borderColor="transparent">
-                        <Rating
-                          name="read-only"
-                          value={4.5} // Replace with the actual review value from API
-                          readOnly
-                          precision={0.5}
-                          emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
-                        />
-                      </Box>
-                      <Typography variant="body2">Description: "The sun slowly descended behind the horizon, casting a warm glow over the tranquil sea."</Typography>
-                      {/* Add photo here */}
-                    </CardContent>
+                      <CardContent>
+                          {/* Placeholder content */}
+                          <Typography variant="h6">Restaurant Name</Typography>
+                          {/* Display review as stars */}
+                          <Box component="fieldset" borderColor="transparent">
+                              <Rating
+                                  name="read-only"
+                                  value={4.5} // Replace with the actual review value from API
+                                  readOnly
+                                  precision={0.5}
+                                  emptyIcon={<StarIcon style={{opacity: 0.55}} fontSize="inherit"/>}
+                              />
+                          </Box>
+                          <Typography variant="body2">Description: "The sun slowly descended behind the horizon, casting
+                              a warm glow over the tranquil sea."</Typography>
+                          {/* Add photo here */}
+                          <img src="https://via.placeholder.com/150" alt="Placeholder"/>
+                      </CardContent>
                   </Card>
                 </Grid>
               ))}
