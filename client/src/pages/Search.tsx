@@ -3,6 +3,11 @@ import HeaderMenu from '../components/HeaderMenu';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Rating from '@mui/material/Rating';
+import StarIcon from '@mui/icons-material/Star';
 
 
 function Search() {
@@ -11,6 +16,7 @@ function Search() {
         <div>
             <HeaderMenu/>
             <Typography variant="h4" align="center" mt={4} sx={{ fontFamily: 'monospace', fontWeight: 'bold'}} >Search Restaurants!</Typography>
+            {/*Search box*/}
             <Box
               component="form"
               sx={{
@@ -23,13 +29,36 @@ function Search() {
             >
               <TextField id="outlined-basic" label="Search..." variant="outlined" fullWidth />
             </Box>
+            {/* Results Box */}
+            <Grid container spacing={2} justifyContent="center" mt={4}>
+              {/* Dummy Data: Replace with actual data from API */}
+              {[1, 2, 3].map((result) => (
+                <Grid item key={result} xs={12} md={5.5} lg={5.5}>
+                  <Card>
+                    <CardContent>
+                      {/* Placeholder content */}
+                      <Typography variant="h6">Restaurant Name</Typography>
+                      {/* Display review as stars */}
+                      <Box component="fieldset" borderColor="transparent">
+                        <Rating
+                          name="read-only"
+                          value={4.5} // Replace with the actual review value from API
+                          readOnly
+                          precision={0.5}
+                          emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                        />
+                      </Box>
+                      <Typography variant="body2">Description: "The sun slowly descended behind the horizon, casting a warm glow over the tranquil sea."</Typography>
+                      {/* Add photo here */}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
         </div>
     </>
   );
 }
-
-
-
 export default Search;
 
 /*
@@ -76,4 +105,21 @@ export default function BasicTextFields() {
     </Box>
   );
 }
+ */
+
+
+
+/*
+Display Review as stars
+                  <Box component="fieldset" borderColor="transparent">
+                    <Typography component="legend">Review:</Typography>
+                    <Rating
+                      name="read-only"
+                      value={4.5} // Replace with the actual review value from API
+                      readOnly
+                      precision={0.5}
+                      emptyIcon={<StarIcon style={{ opacity: 0.55 }} fontSize="inherit" />}
+                    />
+                  </Box>
+
  */
