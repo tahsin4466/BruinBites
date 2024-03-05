@@ -1,5 +1,3 @@
-// LoginSheet.tsx (SignIn Component)
-
 import React, { useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -10,19 +8,55 @@ import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import GoogleLogin from 'react-google-login';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 const defaultTheme = createTheme();
 
-interface LoginSheetProps {
-  onToggleForm: () => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+declare global {
+  interface Window {
+    onSignIn: (googleUser: any) => void;
+  }
 }
 
-export default function LoginSheet({ onToggleForm, onSubmit }: LoginSheetProps) {
+interface CombinedLoginProps {
+  onToggleForm: () => void;
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; // Or Promise<void> if it's asynchronous
+}
+
+export default function CombinedLogin({ onToggleForm }: CombinedLoginProps) {
+  // State hooks for email and password inputs
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // Implement your logic to submit email and password to the backend here
+    console.log('Submitting:', email, password);
+  };
+
+  const responseGoogle = (response: any) => {
+    const profile = response.profileObj;
+    console.log('Google profile', profile);
+    // Implement your Google Sign-In logic here
+  };
+
+  const handleFailure = (error: any) => {
+    console.log('Google Sign-In failed', error);
+    // Optionally handle sign-in failure
+  };
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
@@ -41,7 +75,7 @@ export default function LoginSheet({ onToggleForm, onSubmit }: LoginSheetProps) 
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <Box component="form" onSubmit={onSubmit} noValidate sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
@@ -51,6 +85,7 @@ export default function LoginSheet({ onToggleForm, onSubmit }: LoginSheetProps) 
               name="email"
               autoComplete="email"
               autoFocus
+              onChange={handleEmailChange}
             />
             <TextField
               margin="normal"
@@ -61,6 +96,7 @@ export default function LoginSheet({ onToggleForm, onSubmit }: LoginSheetProps) 
               type="password"
               id="password"
               autoComplete="current-password"
+              onChange={handlePasswordChange}
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
@@ -74,6 +110,16 @@ export default function LoginSheet({ onToggleForm, onSubmit }: LoginSheetProps) 
             >
               Sign In
             </Button>
+            {/* Google Sign-In button */}
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+            <GoogleLogin
+              clientId="1032108831904-nu6qkm5g3m3ghc9p3g2340bc9thcaaed.apps.googleusercontent.com" // Replace with your Google Client ID
+              buttonText="Login with Google"
+              onSuccess={responseGoogle}
+              onFailure={handleFailure}
+              cookiePolicy={'single_host_origin'}
+            />
+            </Box>
             <Grid container>
               <Grid item>
                 <Link href="#" variant="body2" onClick={onToggleForm}>
