@@ -1,5 +1,4 @@
- import { useEffect } from 'react';
-
+import { useEffect } from 'react';
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -40,6 +39,11 @@ export default function SignIn(props: LoginSheetProps) {
   };
 
   // Handle Google Sign-In success
+  const responseGoogle = (response: any) => {
+    console.log('Google profile', response.profileObj);
+    // Perform actions after successful Google Sign-In, e.g., setting user state or redirecting
+  };
+
 const responseGoogle = (response: any) => {
   const profile = response.profileObj;
   console.log('Google profile', profile);
@@ -62,7 +66,6 @@ const signOut = () => {
     console.log('User signed out.');
   });
 };
-
 
   // Handle Google Sign-In failure
   const handleFailure = (error: any) => {
@@ -125,6 +128,7 @@ const signOut = () => {
             </Button>
             {/* Google Sign-In button */}
             <GoogleLogin
+              clientId="YOUR_CLIENT_ID.apps.googleusercontent.com" // Replace with your Google Client ID
               clientId="1032108831904-nu6qkm5g3m3ghc9p3g2340bc9thcaaed.apps.googleusercontent.com" // Replace with your Google Client ID
               buttonText="Login with Google"
               onSuccess={responseGoogle}
