@@ -7,6 +7,10 @@ import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CreateIcon from '@mui/icons-material/Create';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
+interface RestaurantInfo {
+  name: string;
+  description: string;
+}
 interface MealPeriod {
   start: string;
   end: string;
@@ -77,13 +81,8 @@ const isCurrentTimeWithin = (start: string, end: string): boolean => {
   return currentTime >= startTime && currentTime <= endTime;
 };
 
-const findNextMealPeriod = (): { nextMeal: string; startTime: string } => {
+const findNextMealPeriod = (sortedMeals: [string, MealPeriod][]): { nextMeal: string; startTime: string } => {
   const currentTime = new Date();
-  const sortedMeals = Object.entries(restaurantHours).sort((a, b) => {
-    const aStart = a[1].start.split(':');
-    const bStart = b[1].start.split(':');
-    return new Date().setHours(parseInt(aStart[0]), parseInt(aStart[1])) - new Date().setHours(parseInt(bStart[0]), parseInt(bStart[1]));
-  });
   for (let [meal, {start}] of sortedMeals) {
     const mealStartTime = new Date();
     mealStartTime.setHours(parseInt(start.split(':')[0]), parseInt(start.split(':')[1]), 0);
@@ -91,24 +90,16 @@ const findNextMealPeriod = (): { nextMeal: string; startTime: string } => {
       return { nextMeal: meal, startTime: start };
     }
   }
+  // If no future meal period is found, return the first meal period of the next day
   return { nextMeal: sortedMeals[0][0], startTime: sortedMeals[0][1].start };
 };
 
 const CombinedContent: React.FC = () => {
-  const [restaurantImageUrls, setRestaurantImageUrls] = useState<string[]>([
-    'https://source.unsplash.com/collection/827743/1',
-    'https://source.unsplash.com/collection/827743/2',
-    'https://source.unsplash.com/collection/827743/3',
-      'https://source.unsplash.com/collection/827743/4',
-      'https://source.unsplash.com/collection/827743/5',
-      'https://source.unsplash.com/collection/827743/6',
-      'https://source.unsplash.com/collection/827743/7',
-      'https://source.unsplash.com/collection/827743/8',
-      'https://source.unsplash.com/collection/827743/9',
-      'https://source.unsplash.com/collection/827743/10',
-      'https://source.unsplash.com/collection/827743/11',
-  ]);
+  const [restaurantImageUrls, setRestaurantImageUrls] = useState<string[]>([]);
 
+  const [subMenus, setSubMenus] = useState<SubMenu[]>([]); // Correctly typed with your SubMenu interface
+  const [restaurantHours, setRestaurantHours] = useState<RestaurantHours>({}); // Correctly typed with your RestaurantHours interface
+  const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(null);
   const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
   const [openGallery, setOpenGallery] = useState(false);
   const [review, setReview] = useState({ title: '', content: '', rating: 2 });
@@ -117,21 +108,56 @@ const CombinedContent: React.FC = () => {
   const [nextOpeningTime, setNextOpeningTime] = useState<string>('');
 
   useEffect(() => {
-    const updateStatusAndMeal = () => {
+    const fetchMenu = async () => {
+      const response = await fetch('/api/menu');
+      const data = await response.json();
+      setSubMenus(data);
+    };
+
+    const fetchImages = async () => {
+      const response = await fetch('/api/restaurantImages');
+      const data = await response.json();
+      setRestaurantImageUrls(data);
+    };
+
+    const fetchHours = async () => {
+      const response = await fetch('/api/hours');
+      const data = await response.json();
+      setRestaurantHours(data);
+    };
+
+    const fetchInfo = async() => {
+      const response = await fetch('/api/restaurantInfo');
+      const data = await response.json();
+      setRestaurantInfo(data); // Assuming data is an object
+    };
+
+    const updateStatusAndMeal = (restaurantHours: RestaurantHours) => {
+      const currentTime = new Date();
       let foundCurrentMeal = false;
       let status = 'Closed';
       let nextOpening = '';
 
-      Object.entries(restaurantHours).forEach(([meal, { start, end }]) => {
+      // Sort the meals
+      const sortedMeals = Object.entries(restaurantHours).sort((a, b) => {
+        const aStart = parseInt(a[1].start.replace(':', ''), 10);
+        const bStart = parseInt(b[1].start.replace(':', ''), 10);
+        return aStart - bStart;
+      });
+
+      // Determine if the current time is within any meal period
+      for (let [meal, {start, end}] of sortedMeals) {
         if (isCurrentTimeWithin(start, end)) {
           setCurrentMeal(meal);
           status = 'Open';
           foundCurrentMeal = true;
+          break;
         }
-      });
+      }
 
+      // If no current meal period is found, find the next one
       if (!foundCurrentMeal) {
-        const nextMealInfo = findNextMealPeriod();
+        const nextMealInfo = findNextMealPeriod(sortedMeals);
         setCurrentMeal('');
         nextOpening = `Closed. Opens at ${nextMealInfo.startTime} for ${nextMealInfo.nextMeal}`;
       }
@@ -140,11 +166,17 @@ const CombinedContent: React.FC = () => {
       setNextOpeningTime(nextOpening);
     };
 
-    updateStatusAndMeal();
+    fetchMenu();
+    fetchImages();
+    fetchHours();
+    fetchInfo();
+    if (Object.keys(restaurantHours).length > 0) {
+    updateStatusAndMeal(restaurantHours);
+  }
     const interval = setInterval(updateStatusAndMeal, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [restaurantHours]);
 
   const handleOpenGallery = () => setOpenGallery(true);
   const handleCloseGallery = () => setOpenGallery(false);
@@ -180,14 +212,14 @@ const CombinedContent: React.FC = () => {
 
       {/* Updated restaurant status display */}
       <Typography align="left" variant="h2" style={{ fontWeight: 'bold', fontFamily: 'monospace' }} >
-        Bruin Plate
+        {restaurantInfo?.name || ' '}
       </Typography>
       <Typography style={{ fontFamily: 'monospace', color: restaurantStatus === 'Open' ? 'green' : 'red' }} align="left" variant="h6" gutterBottom>
         {restaurantStatus === 'Open' ? `Open till ${restaurantHours[currentMeal]?.end} for ${currentMeal}` : nextOpeningTime}
       </Typography>
 
       <Typography align="left" variant="h5">
-        Dining venue at UCLA emphasizing health-oriented dishes made with local & sustainable ingredients
+        {restaurantInfo?.description || ' '}
       </Typography>
       <Typography variant="h5">‎</Typography>
       {/* Thumbnails and button to open gallery */}
@@ -292,16 +324,23 @@ const CombinedContent: React.FC = () => {
             <Typography style={{ fontWeight: 'bold', fontFamily: 'monospace' }} variant="h4" gutterBottom>
               Today's Hours
             </Typography>
-            {Object.entries(restaurantHours).map(([meal, { start, end }]) => (
-              <Typography
-                variant="h6"
-                key={meal}
-                style={{
-                  color: currentMeal === meal ? '#4caf50' : 'inherit', // Highlight current meal in green
-                }}
-              >
-                <strong>{meal}: </strong>{start} - {end}
-              </Typography>
+            {Object.entries(restaurantHours)
+              .sort((a, b) => {
+                // Split the 'start' string into hours and minutes, then convert to a number for comparison
+                const aStart = parseInt(a[1].start.replace(':', ''), 10);
+                const bStart = parseInt(b[1].start.replace(':', ''), 10);
+                return aStart - bStart;
+              })
+              .map(([meal, { start, end }]) => (
+                <Typography
+                  variant="h6"
+                  key={meal}
+                  style={{
+                    color: currentMeal === meal ? '#4caf50' : 'inherit', // Highlight current meal in green
+                  }}
+                >
+                  <strong>{meal}: </strong>{start} - {end}
+                </Typography>
             ))}
           </Box>
         </Grid>

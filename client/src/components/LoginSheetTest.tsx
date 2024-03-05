@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -42,6 +43,29 @@ export default function SignIn(props: LoginSheetProps) {
     console.log('Google profile', response.profileObj);
     // Perform actions after successful Google Sign-In, e.g., setting user state or redirecting
   };
+
+const responseGoogle = (response: any) => {
+  const profile = response.profileObj;
+  console.log('Google profile', profile);
+  // Check if the email domain is @ucla.edu
+  if (profile.email.endsWith('@ucla.edu')) {
+    console.log('Authenticated UCLA user:', profile.email);
+    // Proceed with your sign-in process, such as setting user state or redirecting
+  } else {
+    console.log('Non-UCLA email detected. Access denied.');
+    // Optionally, you can notify the user they must use a UCLA email
+    // You might also want to sign the user out immediately if they're not authorized
+    signOut();
+  }
+};
+
+// Add the signOut function if it's not already defined
+const signOut = () => {
+  const auth2 = window.gapi.auth2.getAuthInstance();
+  auth2.signOut().then(function () {
+    console.log('User signed out.');
+  });
+};
 
   // Handle Google Sign-In failure
   const handleFailure = (error: any) => {
@@ -105,6 +129,7 @@ export default function SignIn(props: LoginSheetProps) {
             {/* Google Sign-In button */}
             <GoogleLogin
               clientId="YOUR_CLIENT_ID.apps.googleusercontent.com" // Replace with your Google Client ID
+              clientId="1032108831904-nu6qkm5g3m3ghc9p3g2340bc9thcaaed.apps.googleusercontent.com" // Replace with your Google Client ID
               buttonText="Login with Google"
               onSuccess={responseGoogle}
               onFailure={handleFailure}
