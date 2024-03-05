@@ -12,6 +12,11 @@ interface MealPeriod {
   end: string;
 }
 
+interface RestaurantInfo {
+  name: string;
+  description: string;
+}
+
 interface RestaurantHours {
   [key: string]: MealPeriod;
 }
@@ -64,9 +69,14 @@ const subMenus: SubMenu[] = [
 const restaurantHours: RestaurantHours = {
   "Breakfast": {"start": "08:00", "end": "11:00"},
   "Lunch": {"start": "12:00", "end": "14:00"},
-  "Dinner": {"start": "18:00", "end": "21:00"},
+  "Dinner": {"start": "19:00", "end": "18:00"},
   "Late Hours": {"start": "22:00", "end": "24:00"}
 };
+
+const restaurantInfo: RestaurantInfo = {
+  name: "Bruin Plate",
+  description: "Dining venue at UCLA emphasizing health-oriented dishes made with local & sustainable ingredients."
+}
 
 const isCurrentTimeWithin = (start: string, end: string): boolean => {
   const currentTime = new Date();
@@ -180,14 +190,14 @@ const CombinedContent: React.FC = () => {
 
       {/* Updated restaurant status display */}
       <Typography align="left" variant="h2" style={{ fontWeight: 'bold', fontFamily: 'monospace' }} >
-        Bruin Plate
+        {restaurantInfo.name}
       </Typography>
       <Typography style={{ fontFamily: 'monospace', color: restaurantStatus === 'Open' ? 'green' : 'red' }} align="left" variant="h6" gutterBottom>
         {restaurantStatus === 'Open' ? `Open till ${restaurantHours[currentMeal]?.end} for ${currentMeal}` : nextOpeningTime}
       </Typography>
 
       <Typography align="left" variant="h5">
-        Dining venue at UCLA emphasizing health-oriented dishes made with local & sustainable ingredients
+        {restaurantInfo.description}
       </Typography>
       <Typography variant="h5">‎</Typography>
       {/* Thumbnails and button to open gallery */}
