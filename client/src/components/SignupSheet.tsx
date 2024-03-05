@@ -15,19 +15,12 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const defaultTheme = createTheme();
 
-type SignupSheetProps = {
+interface SignupSheetProps {
   onToggleForm: () => void;
-};
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+}
 
-export default function SignUp(props: SignupSheetProps) {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-  };
+export default function SignUp({ onToggleForm, onSubmit }: SignupSheetProps) {
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -47,7 +40,7 @@ export default function SignUp(props: SignupSheetProps) {
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Box component="form" noValidate onSubmit={onSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -102,7 +95,7 @@ export default function SignUp(props: SignupSheetProps) {
             </Button>
             <Grid container>
               <Grid item>
-                <Link href="#" variant="body2" onClick={props.onToggleForm}>
+                <Link href="#" variant="body2" onClick={onToggleForm}>
                   Already have an account? Sign in
                 </Link>
               </Grid>

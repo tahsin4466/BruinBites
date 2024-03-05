@@ -146,14 +146,29 @@ def getRestaurantImages():
     return jsonify(restaurantImages)
 @app.route('/api/login', methods=['POST'])
 def login():
-    data = request.json
-    username = data.get('username')
+    data = request.get_json()
+    email = data.get('email')
     password = data.get('password')
-    # Implement authentication logic here
-    if username == 'valid_username' and password == 'valid_password':
-        return jsonify({'message': 'Login successful'})
+    print(email)
+    print(password)
+    if email and password:
+        return jsonify({'message': 'Login successful', 'status': 'success'}), 200
     else:
-        return jsonify({'message': 'Invalid credentials'}), 401
+        return jsonify({'message': 'Missing credentials', 'status': 'error'}), 400
+
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    FirstName = data.get('firstName')
+    LastName = data.get('lastName')
+    Email = data.get('email')
+    Password = data.get('password')
+    print(Email)
+    print(Password)
+    print (FirstName)
+    print (LastName)
+    # For this example, let's just return a success message
+    return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
 
 
 @app.route('/', defaults={'path': ''})
