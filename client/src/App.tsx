@@ -46,6 +46,7 @@ function App() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/restaurant" element={<Restaurant />} />
         <Route path="/profile" element={<User />} />
+        <Route path="/search" element={<Search />} />
 
 
 
