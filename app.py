@@ -156,8 +156,13 @@ def login():
         return jsonify({'message': 'Invalid credentials'}), 401
 
 
-@app.route('/')
-def home():
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    if path.startswith("api/"):
+        # If the path starts with api/, return a 404 error or similar
+        # since this route should be caught by one of the above API route handlers
+        return "Not Found", 404
     return send_from_directory(app.static_folder, 'index.html')
 
 
