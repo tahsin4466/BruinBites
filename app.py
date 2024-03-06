@@ -1,8 +1,18 @@
 from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
+import pymysql
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 CORS(app)
+
+def dbConnect():
+    return pymysql.connect(
+        host="bruin-bites.ctamuwuo6it1.us-east-2.rds.amazonaws.com",
+        port=3306,
+        user="admin",
+        passwd="bruinbites",
+        db="BruinBites"
+    )
 
 # Sample data
 restaurantImages = [
@@ -93,11 +103,6 @@ reviewData = [
     }
 ]
 
-restaurantInfo = {
-    "name": "Bruin Plate",
-    "description": "Dining venue at UCLA emphasizing health-oriented dishes made with local & sustainable ingredients"
-}
-
 sub_menus = [
     {
         "name": "Starters",
@@ -127,6 +132,16 @@ restaurant_hours = {
 
 @app.route('/api/restaurantInfo', methods=['GET'])
 def get_restaurantInfo():
+    restaurantID = 2
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Dining_Name, Dining_Description FROM `BB_Dining` WHERE BB_DiningID = %s"
+            cursor.execute(sql, (restaurantID,))
+            info = cursor.fetchone()
+            restaurantInfo = {"name": info[0], "description": info[1]}
+    finally:
+        db_connection.close()
     return jsonify(restaurantInfo)
 
 @app.route('/api/menu', methods=['GET'])

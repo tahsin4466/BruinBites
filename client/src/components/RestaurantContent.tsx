@@ -212,14 +212,14 @@ const CombinedContent: React.FC = () => {
 
       {/* Updated restaurant status display */}
       <Typography align="left" variant="h2" style={{ fontWeight: 'bold', fontFamily: 'monospace' }} >
-        {restaurantInfo?.name || ' '}
+        {restaurantInfo?.name || 'Loading...'}
       </Typography>
       <Typography style={{ fontFamily: 'monospace', color: restaurantStatus === 'Open' ? 'green' : 'red' }} align="left" variant="h6" gutterBottom>
         {restaurantStatus === 'Open' ? `Open till ${restaurantHours[currentMeal]?.end} for ${currentMeal}` : nextOpeningTime}
       </Typography>
 
       <Typography align="left" variant="h5">
-        {restaurantInfo?.description || ' '}
+        {restaurantInfo?.description || 'Loading...'}
       </Typography>
       <Typography variant="h5">‎</Typography>
       {/* Thumbnails and button to open gallery */}
