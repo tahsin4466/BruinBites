@@ -5,6 +5,8 @@ This is a web application that helps UCLA students find the best eats on campus!
 
 This project is being built using a Flask backend and a React front end with MUI. A MySQL server hosted on AWS will faciliate dynamic data storage and retrieval. It is part of a collaborative project for CS35L - Software Construction.
 
+To run and access this site you MUST be on eduroam. This is for security reasons to access the database data locally.
+
 ## Installation
 Make sure you have the latest version of Python installed (preferabbly 3.12+). You will also need to install node.js on your machine for access to npm.
 
@@ -16,23 +18,15 @@ pip install flask
 
 Make sure to have Flask configured to target the file `app.py`.
 
-Additionally, this project uses Selenium: a Python framework for browser automation. For this project, we will use this library to scrape data from the UCLA dining page. 
-Again, using pip, run:
-
-```
-pip install selenium
-```
-
-then install the webdriver similarly:
-
-```
-pip install webdriver-manager
-```
-
-finally, install flask-cors:
+Install flask-cors:
 
 ```
 pip install flask-cors
+```
+
+then finally, install pymysql:
+```
+pip install pymysql
 ```
 
 If you have a Linux operating system, use `pip3` instead of `pip` to install the above.
