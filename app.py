@@ -1,6 +1,7 @@
 from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 import pymysql
+import os
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 CORS(app)
@@ -126,8 +127,8 @@ sub_menus = [
 restaurant_hours = {
     "Breakfast": {"start": "08:00", "end": "11:00"},
     "Lunch": {"start": "12:00", "end": "14:00"},
-    "Dinner": {"start": "18:00", "end": "21:00"},
-    "Extended": {"start": "22:00", "end": "24:00"},
+    "Dinner": {"start": "18:00", "end": "20:00"},
+    "Extended": {"start": "21:00", "end": "24:00"},
 }
 
 @app.route('/api/restaurantInfo', methods=['GET'])
@@ -139,7 +140,10 @@ def get_restaurantInfo():
             sql = "SELECT Dining_Name, Dining_Description FROM `BB_Dining` WHERE BB_DiningID = %s"
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchone()
-            restaurantInfo = {"name": info[0], "description": info[1]}
+            restaurantInfo = {
+                "name": info[0],
+                "description": info[1]
+            }
     finally:
         db_connection.close()
     return jsonify(restaurantInfo)
@@ -178,24 +182,27 @@ def signup():
     LastName = data.get('lastName')
     Email = data.get('email')
     Password = data.get('password')
-    print(Email)
-    print(Password)
-    print (FirstName)
-    print (LastName)
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "INSERT INTO BB_USER ()"
     # For this example, let's just return a success message
     return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
 
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
-    if path.startswith("api/"):
-        # If the path starts with api/, return a 404 error or similar
-        # since this route should be caught by one of the above API route handlers
-        return "Not Found", 404
+
+
+@app.route('/')
+def homePage():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/restaurant')
+def restaurantPage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/login')
+def loginPage():
+    return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-

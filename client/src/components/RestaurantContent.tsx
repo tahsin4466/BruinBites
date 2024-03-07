@@ -11,6 +11,7 @@ interface RestaurantInfo {
   name: string;
   description: string;
 }
+
 interface MealPeriod {
   start: string;
   end: string;
@@ -29,48 +30,6 @@ interface SubMenu {
   name: string;
   items: MenuItem[];
 }
-
-const subMenus: SubMenu[] = [
-  {
-    name: "Starters",
-    items: [
-      { name: "Soup of the day", price: "$5" },
-      { name: "Bruschetta", price: "$7" },
-      // ... other starters
-    ],
-  },
-  {
-    name: "Main Courses",
-    items: [
-      { name: "Steak", price: "$20" },
-      { name: "Salmon", price: "$18" },
-      // ... other main courses
-    ],
-  },
-  {
-    name: "Main Courses",
-    items: [
-      { name: "Steak", price: "$20" },
-      { name: "Salmon", price: "$18" },
-      // ... other main courses
-    ],
-  },
-    {
-    name: "Main Courses",
-    items: [
-      { name: "Steak", price: "$20" },
-      { name: "Salmon", price: "$18" },
-      // ... other main courses
-    ],
-  },
-];
-
-const restaurantHours: RestaurantHours = {
-  "Breakfast": {"start": "08:00", "end": "11:00"},
-  "Lunch": {"start": "12:00", "end": "14:00"},
-  "Dinner": {"start": "18:00", "end": "21:00"},
-  "Late Hours": {"start": "22:00", "end": "24:00"}
-};
 
 const isCurrentTimeWithin = (start: string, end: string): boolean => {
   const currentTime = new Date();
@@ -96,9 +55,8 @@ const findNextMealPeriod = (sortedMeals: [string, MealPeriod][]): { nextMeal: st
 
 const CombinedContent: React.FC = () => {
   const [restaurantImageUrls, setRestaurantImageUrls] = useState<string[]>([]);
-
-  const [subMenus, setSubMenus] = useState<SubMenu[]>([]); // Correctly typed with your SubMenu interface
-  const [restaurantHours, setRestaurantHours] = useState<RestaurantHours>({}); // Correctly typed with your RestaurantHours interface
+  const [subMenus, setSubMenus] = useState<SubMenu[]>([]);
+  const [restaurantHours, setRestaurantHours] = useState<RestaurantHours>({});
   const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(null);
   const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
   const [openGallery, setOpenGallery] = useState(false);
@@ -107,39 +65,54 @@ const CombinedContent: React.FC = () => {
   const [restaurantStatus, setRestaurantStatus] = useState<string>('Closed');
   const [nextOpeningTime, setNextOpeningTime] = useState<string>('');
 
+  // Async functions for fetching data
+  const fetchMenu = async () => {
+    const response = await fetch('/api/menu');
+    const data = await response.json();
+    setSubMenus(data);
+  };
+
+  const fetchImages = async () => {
+    const response = await fetch('/api/restaurantImages');
+    const data = await response.json();
+    setRestaurantImageUrls(data);
+  };
+
+  const fetchHours = async () => {
+    const response = await fetch('/api/hours');
+    const data = await response.json();
+    setRestaurantHours(data);
+  };
+
+  const fetchInfo = async() => {
+    const response = await fetch('/api/restaurantInfo');
+    const data = await response.json();
+    setRestaurantInfo(data); // Assuming data is an object
+  };
+
   useEffect(() => {
-    const fetchMenu = async () => {
-      const response = await fetch('/api/menu');
-      const data = await response.json();
-      setSubMenus(data);
+    // Fetch data only once on component mount
+    const fetchData = async () => {
+      await fetchMenu();
+      await fetchImages();
+      await fetchHours();
+      await fetchInfo();
     };
 
-    const fetchImages = async () => {
-      const response = await fetch('/api/restaurantImages');
-      const data = await response.json();
-      setRestaurantImageUrls(data);
-    };
+    fetchData();
+  }, []); // Empty dependency array means this effect runs once on mount
 
-    const fetchHours = async () => {
-      const response = await fetch('/api/hours');
-      const data = await response.json();
-      setRestaurantHours(data);
-    };
-
-    const fetchInfo = async() => {
-      const response = await fetch('/api/restaurantInfo');
-      const data = await response.json();
-      setRestaurantInfo(data); // Assuming data is an object
-    };
-
-    const updateStatusAndMeal = (restaurantHours: RestaurantHours) => {
+  useEffect(() => {
+    // Update restaurant status based on restaurantHours
+    const updateStatusAndMeal = (hours: RestaurantHours) => {
+      // Your existing logic for updating the status and meal...
       const currentTime = new Date();
       let foundCurrentMeal = false;
       let status = 'Closed';
       let nextOpening = '';
 
       // Sort the meals
-      const sortedMeals = Object.entries(restaurantHours).sort((a, b) => {
+      const sortedMeals = Object.entries(hours).sort((a, b) => {
         const aStart = parseInt(a[1].start.replace(':', ''), 10);
         const bStart = parseInt(b[1].start.replace(':', ''), 10);
         return aStart - bStart;
@@ -166,17 +139,14 @@ const CombinedContent: React.FC = () => {
       setNextOpeningTime(nextOpening);
     };
 
-    fetchMenu();
-    fetchImages();
-    fetchHours();
-    fetchInfo();
     if (Object.keys(restaurantHours).length > 0) {
-    updateStatusAndMeal(restaurantHours);
-  }
-    const interval = setInterval(updateStatusAndMeal, 60000);
+      updateStatusAndMeal(restaurantHours);
+    }
+
+    const interval = setInterval(() => updateStatusAndMeal(restaurantHours), 60000); // Adjust the interval as needed
 
     return () => clearInterval(interval);
-  }, [restaurantHours]);
+  }, [restaurantHours]); // This effect depends on restaurantHours
 
   const handleOpenGallery = () => setOpenGallery(true);
   const handleCloseGallery = () => setOpenGallery(false);
