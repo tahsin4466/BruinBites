@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import HeaderMenu from '../components/HeaderMenu';
 import { Box, Typography, TextField, Grid, Card, CardContent } from '@mui/material';
 import Rating from '@mui/material/Rating';
 import StarIcon from '@mui/icons-material/Star';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Collapse from '@mui/material/Collapse'; // Import Collapse component
+import { IconButton } from '@mui/material';
+
 
 // Define an array of restaurant objects with image, name, review, and description properties
 const restaurants = [
@@ -10,7 +14,12 @@ const restaurants = [
     image: 'https://source.unsplash.com/random', // random
     name: 'Restaurant 1',
     review: 4.5,
-    description: 'Description of Restaurant 1',
+    description: '\n' +
+        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."' +
+        '\n' +
+        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."' +
+        '\n' +
+        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."',
   },
   {
     image: 'https://source.unsplash.com/random', // random
@@ -48,6 +57,15 @@ const restaurants = [
 
 
 function Search() {
+  const [expanded, setExpanded] = useState(-1);
+
+  const handleExpand = (index: number) => {
+    setExpanded((prevExpanded) => (prevExpanded === index ? -1 : index));
+  };
+
+
+
+
   return (
     <div style={{ height: '100vh', overflow: 'auto' }}>
       <HeaderMenu />
@@ -70,15 +88,16 @@ function Search() {
         </Box>
         {/* Results Box */}
         <Grid container spacing={2} justifyContent="center" mt={4}>
-          {/* Map over the array of restaurants to render each restaurant card */}
           {restaurants.map((restaurant, index) => (
             <Grid item key={index} xs={12} md={5.5} lg={5.5}>
               <Card>
                 <CardContent style={{ display: 'flex', alignItems: 'center' }}>
                   {/* Restaurant image */}
-                  <img src={restaurant.image}
-                       alt={restaurant.name}
-                       style={{ width: '150px', height: '150px', objectFit: "cover", marginRight: '1rem' }} />
+                  <img
+                    src={restaurant.image}
+                    alt={restaurant.name}
+                    style={{ width: '150px', height: '150px', objectFit: 'cover', marginRight: '1rem' }}
+                  />
                   <div>
                     {/* Restaurant Name */}
                     <Typography variant="h6">{restaurant.name}</Typography>
@@ -96,11 +115,24 @@ function Search() {
                     <Typography variant="body2">{restaurant.description}</Typography>
                   </div>
                 </CardContent>
+                {/* Collapse component for detailed view */}
+                <Collapse in={expanded === index} timeout="auto" unmountOnExit>
+                  <CardContent>
+                    {/* Detailed content goes here */}
+                  </CardContent>
+                </Collapse>
+                {/* Expand button */}
+                <IconButton
+                  onClick={() => handleExpand(index)}
+                  aria-expanded={expanded === index}
+                  aria-label="show more"
+                >
+                  <ExpandMoreIcon />
+                </IconButton>
               </Card>
             </Grid>
           ))}
         </Grid>
-
       </Box>
     </div>
   );
