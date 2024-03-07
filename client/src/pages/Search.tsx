@@ -68,8 +68,10 @@ function Search() {
 
   return (
     <div style={{ height: '100vh', overflow: 'auto' }}>
-      <HeaderMenu />
-      <Box p={2}>
+      <Box style={{ position: 'fixed', width: '100%', zIndex: 1000 }}>
+        <HeaderMenu />
+      </Box>
+      <Box p={2} mt={12}> {/* Add mt={12} to create space below the fixed header */}
         <Typography variant="h4" align="center" mt={4} sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
           Search Restaurants!
         </Typography>
