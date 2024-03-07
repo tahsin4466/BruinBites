@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 from datetime import datetime
 import re
+import os
 
 # chrome driver
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -59,10 +60,17 @@ for row in table_rows:
     })
 
 df = pd.DataFrame(data)
+n = 1
+df.drop(df.tail(n).index,inplace=True) # drop last n rows
+
+# make folder for data
+if not (os.path.isdir("data")):
+    os.mkdir("data")
+path = os.path.join(os.getcwd(), "data", filename)
 
 # save as csv
-df.to_csv(filename, index=False)
-print(f"Data saved to {filename}")
+df.to_csv(path, index=False)
+print(f"Data saved to {path}")
 
 # close driver
 driver.quit()
