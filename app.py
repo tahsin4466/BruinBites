@@ -103,6 +103,23 @@ reviewData = [
     }
 ]
 
+
+
+
+@app.route('/api/restaurantInfo', methods=['GET'])
+def get_restaurantInfo():
+    restaurantID = 2
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Dining_Name, Dining_Description FROM `BB_Dining` WHERE BB_DiningID = %s"
+            cursor.execute(sql, (restaurantID,))
+            info = cursor.fetchone()
+            restaurantInfo = {"name": info[0], "description": info[1]}
+    finally:
+        db_connection.close()
+    return jsonify(restaurantInfo)
+
 sub_menus = [
     {
         "name": "Starters",
@@ -123,33 +140,53 @@ sub_menus = [
     # Add other categories
 ]
 
-restaurant_hours = {
-    "Breakfast": {"start": "08:00", "end": "11:00"},
-    "Lunch": {"start": "12:00", "end": "14:00"},
-    "Dinner": {"start": "18:00", "end": "21:00"},
-    "Extended": {"start": "22:00", "end": "24:00"},
-}
-
-@app.route('/api/restaurantInfo', methods=['GET'])
-def get_restaurantInfo():
+@app.route('/api/menu', methods=['GET'])
+def get_menu():
+    '''
     restaurantID = 2
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
-            sql = "SELECT Dining_Name, Dining_Description FROM `BB_Dining` WHERE BB_DiningID = %s"
+            sql = "SELECT Menu_Heading, Menu_Subheading, Menu_Item FROM `BB_Menu` WHERE BB_DiningID = %s"
             cursor.execute(sql, (restaurantID,))
-            info = cursor.fetchone()
-            restaurantInfo = {"name": info[0], "description": info[1]}
+            info = cursor.fetchall()
+            #sub_menus2 = []
+            breakfast, lunch, dinner, extended = [], [],[],[]
+            for row in info:
+                if row[0] == 'Breakfast':
+                    for
+
+                #sub_menus2.append
+
+
     finally:
         db_connection.close()
-    return jsonify(restaurantInfo)
+    '''
 
-@app.route('/api/menu', methods=['GET'])
-def get_menu():
     return jsonify(sub_menus)
 
 @app.route('/api/hours', methods=['GET'])
 def get_hours():
+    restaurantID = 1
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Dining_Breakfast, Dining_Lunch, Dining_Dinner, Dining_Extended FROM `BB_Dining` WHERE BB_DiningID = %s"
+            cursor.execute(sql, (restaurantID,))
+            info = cursor.fetchone()
+            times = []
+            for time_range in info:
+                start_time, end_time = time_range.split()
+                times.append(start_time)
+                times.append(end_time)
+            restaurant_hours = {
+                "Breakfast": {"start": times[0], "end": times[1]},
+                "Lunch": {"start": times[2], "end": times[3]},
+                "Dinner": {"start": times[4], "end": times[5]},
+                "Extended": {"start": times[6], "end": times[7]},
+            }
+    finally:
+        db_connection.close()
     return jsonify(restaurant_hours)
 
 @app.route('/api/reviews', methods=['GET'])
