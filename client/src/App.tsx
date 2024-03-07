@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
+import Home from './pages/home';
 import LoginPage from "./pages/Login";
 import Leaderboard from './pages/Leaderboard'; // Adjust the path based on the actual location of your 'Leaderboard' component
 import Search from './pages/Search'; // Adjust the path based on the actual location of your 'Leaderboard' component
