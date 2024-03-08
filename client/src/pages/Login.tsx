@@ -1,23 +1,56 @@
-// Login.tsx (Parent Component)
-
-import React, { useState } from 'react';
-import CombinedLogin from '../components/LoginSheet'; // Ensure this path is correct
-import SignUp from '../components/SignupSheet'; // Ensure this path is correct
+import React, { useState, useContext, createContext, ReactNode, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Container from '@mui/material/Container';
-import axios from 'axios';
 import { Snackbar, Alert } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+
+import CombinedLogin from '../components/LoginSheet';
+import SignUp from '../components/SignupSheet';
+
+// Define your AuthContext and AuthProvider outside of the Login component
+interface AuthContextType {
+  isAuthenticated: boolean;
+  setAuthenticated: (value: boolean) => void;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+// AuthProvider should be defined and used at the top level of your component tree, not inside Login
+const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+  const [isAuthenticated, setAuthenticated] = useState(false);
+
+  return (
+    <AuthContext.Provider value={{ isAuthenticated, setAuthenticated }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 const defaultTheme = createTheme();
 
 const Login: React.FC = () => {
-  const navigate = useNavigate(); //to the top
+  const navigate = useNavigate();
+  const { isAuthenticated, setAuthenticated } = useAuth(); // Destructure isAuthenticated here
   const [showLogin, setShowLogin] = useState<boolean>(true);
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>('');
 
   const toggleForm = () => setShowLogin(!showLogin);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/restaurant');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLoginSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,15 +59,19 @@ const Login: React.FC = () => {
     const password = formData.get('password') as string;
 
     try {
-      console.log("Trying to log in")
       const response = await axios.post('/api/login', { email, password });
-      console.log('Login successful:', response.data);
-      navigate('/home');
-
-    } catch (error: any) { // Adjusting to catch block for TypeScript
-      console.error('Login failed:', error);
-      const errorMessage = error.response && error.response.data.message ? error.response.data.message : 'Login failed';
-      setSnackbarMessage(errorMessage);
+      if (response.data.status === 'success') {
+        console.log('Login successful:', response.data);
+        setAuthenticated(true);
+        navigate('/search');
+      } else {
+        console.error('Login failed:', response.data.message);
+        setSnackbarMessage(response.data.message || 'Login failed');
+        setOpenSnackbar(true);
+      }
+    } catch (error: any) {
+      console.error('Login request failed:', error);
+      setSnackbarMessage(error.response?.data?.message || 'Login request failed');
       setOpenSnackbar(true);
     }
   };
@@ -62,7 +99,7 @@ const Login: React.FC = () => {
   };
 
   const handleCloseSnackbar = (
-    event: React.SyntheticEvent<any, Event> | Event,
+    event?: React.SyntheticEvent<any, Event> | Event,
     reason?: string
   ) => {
     if (reason === 'clickaway') {
@@ -77,12 +114,12 @@ const Login: React.FC = () => {
         {showLogin ? (
           <CombinedLogin
             onToggleForm={toggleForm}
-            onSubmit={handleLoginSubmit} // Pass handleLoginSubmit here
+            onSubmit={handleLoginSubmit}
           />
         ) : (
           <SignUp
             onToggleForm={toggleForm}
-            onSubmit={handleSignUpSubmit} // Ensure handleSignUpSubmit is correctly passed
+            onSubmit={handleSignUpSubmit}
           />
         )}
       </Container>
@@ -93,6 +130,11 @@ const Login: React.FC = () => {
       </Snackbar>
     </ThemeProvider>
   );
-}
+};
 
-export default Login;
+// Ensure to wrap the component that uses useAuth hook within AuthProvider in the component tree.
+export default () => (
+  <AuthProvider>
+    <Login />
+  </AuthProvider>
+);

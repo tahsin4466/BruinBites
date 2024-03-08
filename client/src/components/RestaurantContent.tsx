@@ -289,8 +289,6 @@ const CombinedContent: React.FC = () => {
           <Box
             sx={{
               p: 2,
-              boxShadow: 3,
-              borderRadius: '40px',
             }}
           >
             <Typography style={{ fontWeight: 'bold', fontFamily: 'monospace' }} variant="h4" gutterBottom>

@@ -27,6 +27,13 @@ import LocalPizzaIcon from '@mui/icons-material/LocalPizza';
 import RamenDiningIcon from '@mui/icons-material/RamenDining';
 import BakeryDiningIcon from '@mui/icons-material/BakeryDining';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+import {useEffect, useState} from "react";
+
+
+interface UserPFP {
+  imageURL: string;
+  loggedIn: string;
+}
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -100,9 +107,20 @@ function Logo() {
 }
 
 function ResponsiveAppBar() {
+  const [userPFP, setUserPFP] = useState<UserPFP | null>(null);
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate(); //to the top
+
+  const fetchUserPFP = async() => {
+    const response = await fetch('/api/userImage');
+    const data = await response.json();
+    setUserPFP(data); // Assuming data is an object
+  };
+
+  useEffect(() => {
+    fetchUserPFP();
+  }, []);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -137,111 +155,114 @@ function ResponsiveAppBar() {
 
 // Function to handle clicks on settings menu items
   const handleSettingMenuItemClick = (setting: string) => {
-    console.log('handleMenuItemClick function called with setting:', setting);
-    handleCloseUserMenu(); // Always close the menu after clicking a menu item
-    if (setting === 'Logout') {
-      console.log('Logging out...');
-      // If the user clicks on "Logout", navigate to the login page
-      navigate('/login'); // Invoke navigation to the login page
-    }
-    else if (setting === 'Profile') {
-      console.log('to the profile!!');
-      navigate('/profile'); // Invoke navigation to the profile page
-    }
-  };
-
-
+  console.log('handleMenuItemClick function called with setting:', setting);
+  handleCloseUserMenu(); // Always close the menu after clicking a menu item
+  if (setting === 'Logout') {
+    console.log('Logging out...');
+    // Call the backend API to log out, then navigate to the login page
+    fetch('/api/logout', { method: 'POST' })
+      .then(response => {
+        if (response.ok) {
+          navigate('/login'); // Navigate to login page after successful logout
+        }
+      })
+      .catch(error => console.error('Error logging out:', error));
+  } else if (setting === 'Profile') {
+    console.log('to the profile!!');
+    navigate('/profile'); // Invoke navigation to the profile page
+  }
+};
 
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Logo></Logo>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            Bruin Bites
-          </Typography>
+  <AppBar position="static">
+    <Container maxWidth="xl">
+      <Toolbar disableGutters>
+        <Logo />
+        <Typography
+          variant="h6"
+          noWrap
+          component="a"
+          href="#app-bar-with-responsive-menu"
+          sx={{
+            mr: 2,
+            display: { xs: 'none', md: 'flex' },
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            letterSpacing: '.3rem',
+            color: 'inherit',
+            textDecoration: 'none',
+          }}
+        >
+          Bruin Bites
+        </Typography>
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
-              }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={() => handlePageMenuItemClick(page)}>
-                  <Typography textAlign="center">{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
+        <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleOpenNavMenu}
+            color="inherit"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorElNav}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+            open={Boolean(anchorElNav)}
+            onClose={handleCloseNavMenu}
             sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
+              display: { xs: 'block', md: 'none' },
             }}
           >
-            BB
-          </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={() => handlePageMenuItemClick(page)}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page}
-              </Button>
+              <MenuItem key={page} onClick={() => handlePageMenuItemClick(page)}>
+                <Typography textAlign="center">{page}</Typography>
+              </MenuItem>
             ))}
-          </Box>
-          <Box sx={{ flexGrow: 0.5}}>
-            <Search>
+          </Menu>
+        </Box>
+        <Typography
+          variant="h5"
+          noWrap
+          component="a"
+          href="#app-bar-with-responsive-menu"
+          sx={{
+            mr: 2,
+            display: { xs: 'flex', md: 'none' },
+            flexGrow: 1,
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            letterSpacing: '.3rem',
+            color: 'inherit',
+            textDecoration: 'none',
+          }}
+        >
+          BB
+        </Typography>
+        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          {pages.map((page) => (
+            <Button
+              key={page}
+              onClick={() => handlePageMenuItemClick(page)}
+              sx={{ my: 2, color: 'white', display: 'block' }}
+            >
+              {page}
+            </Button>
+          ))}
+        </Box>
+        <Box sx={{ flexGrow: 0.5 }}>
+          <Search>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
@@ -250,39 +271,51 @@ function ResponsiveAppBar() {
               inputProps={{ 'aria-label': 'search' }}
             />
           </Search>
-          </Box>
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
+        </Box>
+        <Box sx={{ flexGrow: 0 }}>
+          {userPFP?.loggedIn === "true" ? (
+            <>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar src={userPFP?.imageURL || "https://upload.wikimedia.org/wikipedia/commons/5/59/Empty.png?20091205084734"} />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {settings.map((setting) => (
+                  <MenuItem key={setting} onClick={() => handleSettingMenuItemClick(setting)}>
+                    <Typography textAlign="center">{setting}</Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </>
+          ) : (
+            <Button
+              color="inherit"
+              onClick={() => navigate('/login')}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={() => handleSettingMenuItemClick(setting)}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  );
+              Sign In
+            </Button>
+          )}
+        </Box>
+      </Toolbar>
+    </Container>
+  </AppBar>
+);
+
 }
 export default ResponsiveAppBar;

@@ -204,6 +204,34 @@ restaurant_hours = {
     "Extended": {"start": "21:00", "end": "24:00"},
 }
 
+@app.route('/api/userImage', methods=['GET'])
+def get_userImage():
+    if 'id' in session:
+        print("In session")
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                sql = "SELECT User_PFP FROM BB_User WHERE User_ID = %s"
+                cursor.execute(sql, (session['id'],))
+                info = cursor.fetchone()
+                print(info)
+                userPFP = {
+                    "imageURL": info[0],
+                    "loggedIn": "true"
+                }
+        finally:
+            db_connection.close()
+        print("sent user image")
+    else:
+        userPFP = {
+            "imageURL": "",
+            "loggedIn": "false"
+        }
+        print("sent default image")
+
+    print(userPFP)
+    return jsonify(userPFP)
+
 @app.route('/api/restaurantInfo', methods=['GET'])
 def get_restaurantInfo():
     restaurantID = 2
@@ -258,13 +286,11 @@ def login():
                 message = jsonify({'message': 'Incorrect password', 'status': 'failure'}), 401
             else:
                 print("Logged in successfully")
-                session['email'] = email
                 session['id'] = row[0][1]
                 message = jsonify({'message': 'Login successful', 'status': 'success'}), 202
     finally:
         db_connection.close()
     return message
-
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -291,9 +317,16 @@ def signup():
         db_connection.close()
     return message
 
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    print("Popped the session")
+    session.pop('id', None)
+    return jsonify({"success": True, "message": "You have been logged out successfully."}), 200
+
+#Page routing
 @app.route('/api/session')
 def check_session():
-    if 'email' in session:
+    if 'id' in session:
         return jsonify({'isAuthenticated': True})
     else:
         return jsonify({'isAuthenticated': False})
