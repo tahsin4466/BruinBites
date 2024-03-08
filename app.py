@@ -1,10 +1,12 @@
-from flask import Flask, send_from_directory, jsonify, request
+from flask import Flask, send_from_directory, jsonify, request, session
 from flask_cors import CORS
 import pymysql
 import os
 from datetime import date
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
+secret = os.urandom(12)
+app.config['SECRET_KEY'] = secret
 CORS(app)
 
 def dbConnect():
@@ -239,12 +241,30 @@ def login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    print(email)
-    print(password)
-    if email and password:
-        return jsonify({'message': 'Login successful', 'status': 'success'}), 200
-    else:
-        return jsonify({'message': 'Missing credentials', 'status': 'error'}), 400
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Password, User_ID FROM `BB_User` WHERE Email = %s"
+            cursor.execute(sql, (email,))
+            row = cursor.fetchall()
+            if len(row) == 0:
+                print("Invalid email")
+                message = jsonify({'message': 'User does not exist', 'status': 'failure'}), 404
+            elif len(row) > 1:
+                print("Email already registered")
+                message = jsonify({'message': 'Database error, duplicate entry', 'status': 'failure'}), 400
+            elif row[0][0] != password:
+                print("Invalid password")
+                message = jsonify({'message': 'Incorrect password', 'status': 'failure'}), 401
+            else:
+                print("Logged in successfully")
+                session['email'] = email
+                session['id'] = row[0][1]
+                message = jsonify({'message': 'Login successful', 'status': 'success'}), 202
+    finally:
+        db_connection.close()
+    return message
+
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -270,6 +290,13 @@ def signup():
     finally:
         db_connection.close()
     return message
+
+@app.route('/api/session')
+def check_session():
+    if 'email' in session:
+        return jsonify({'isAuthenticated': True})
+    else:
+        return jsonify({'isAuthenticated': False})
 
 @app.route('/')
 def homePage():
