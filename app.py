@@ -27,6 +27,7 @@ restaurantImages = [
     "https://i.insider.com/59f2479ccfad392f0d755979?width=600&format=jpeg&auto=webp",
 ]
 
+'''
 reviewData = [
     {
         "title": "Delicious and Affordable",
@@ -102,6 +103,7 @@ reviewData = [
         "content": "The mac and cheese slaps"
     }
 ]
+'''
 
 
 
@@ -189,8 +191,25 @@ def get_hours():
         db_connection.close()
     return jsonify(restaurant_hours)
 
+
 @app.route('/api/reviews', methods=['GET'])
 def get_reviews():
+    restaurantID = 1
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = ("SELECT r.Review_Title, r.Review_Rating, r.Review_Picture, u.User_PFP, u.First_Name, r.Review_Comment FROM BB_Review r "
+                   "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s" )
+            cursor.execute(sql, (restaurantID,))
+            info = cursor.fetchall()
+            print("hello")
+            reviewData = []
+            for row in info:
+                photos = row[2].split()
+                reviewData.append({"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[3],
+                                    "userName": row[4], "content": row[5]})
+    finally:
+        db_connection.close()
     return jsonify(reviewData)
 
 @app.route('/api/restaurantImages', methods=['GET'])
