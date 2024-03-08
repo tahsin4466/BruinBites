@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 import pymysql
 import os
+from datetime import date
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 CORS(app)
@@ -252,12 +253,23 @@ def signup():
     LastName = data.get('lastName')
     Email = data.get('email')
     Password = data.get('password')
-    '''db_connection = dbConnect()
+    today = date.today()
+    db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
-            sql = "INSERT INTO BB_USER ()"
-    # For this example, let's just return a success message
-    return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201'''
+            sql = "SELECT * FROM `BB_User` WHERE Email = %s"
+            cursor.execute(sql, (Email))
+            row = cursor.fetchall()
+            if len(row) > 0:
+                message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
+            else:
+                sql = "INSERT INTO BB_User (First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
+                cursor.execute(sql, (FirstName, LastName, Email, today, Password,))
+                db_connection.commit()
+                message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
+    finally:
+        db_connection.close()
+    return message
 
 @app.route('/')
 def homePage():

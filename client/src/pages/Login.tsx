@@ -1,38 +1,34 @@
 // Login.tsx (Parent Component)
 
 import React, { useState } from 'react';
-import LoginSheet from '../components/LoginSheet'; // Make sure the path is correct
-import SignUp from '../components/SignupSheet'; // Make sure the path is correct
+import LoginSheet from '../components/LoginSheet'; // Ensure this path is correct
+import SignUp from '../components/SignupSheet'; // Ensure this path is correct
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Container from '@mui/material/Container';
 import axios from 'axios';
+import { Snackbar, Alert } from '@mui/material';
 
 const defaultTheme = createTheme();
 
-function Login() {
-  const [showLogin, setShowLogin] = useState(true);
+const Login: React.FC = () => {
+  const [showLogin, setShowLogin] = useState<boolean>(true);
+  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
 
   const toggleForm = () => setShowLogin(!showLogin);
 
   const handleLoginSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const username = formData.get('username');
-    const password = formData.get('password');
-
-    // This function should match the expected type in SignupSheetProps
-  const handleSignUpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    // Implementation for handling sign-up form submission
-  };
+    const username = formData.get('username') as string;
+    const password = formData.get('password') as string;
 
     try {
       const response = await axios.post('/api/login', { username, password });
       console.log('Login successful:', response.data);
-      // Handle the successful login here, such as setting user session data
-    } catch (error) {
+
+    } catch (error: any) { // Adjusting to catch block for TypeScript
       console.error('Login failed:', error);
-      // Handle the login failure here, such as showing a notification
     }
   };
 
@@ -40,20 +36,32 @@ function Login() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const signUpData = {
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
-      email: formData.get('email'),
-      password: formData.get('password'),
+      firstName: formData.get('firstName') as string,
+      lastName: formData.get('lastName') as string,
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
     };
 
     try {
       const response = await axios.post('/api/signup', signUpData);
       console.log('Sign up successful:', response.data);
-      // Handle the successful sign up here, such as redirecting to the login page
-    } catch (error) {
+      toggleForm();
+    } catch (error: any) { // Adjusting to catch block for TypeScript
       console.error('Sign up failed:', error);
-      // Handle the sign up failure here, such as showing a notification
+      const errorMessage = error.response && error.response.data.message ? error.response.data.message : 'Login failed';
+      setSnackbarMessage(errorMessage);
+      setOpenSnackbar(true);
     }
+  };
+
+  const handleCloseSnackbar = (
+    event: React.SyntheticEvent<any, Event> | Event,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
   };
 
   return (
@@ -67,10 +75,15 @@ function Login() {
         ) : (
           <SignUp
             onToggleForm={toggleForm}
-            onSubmit={handleSignUpSubmit} // Pass the handleSignUpSubmit function here
+            onSubmit={handleSignUpSubmit} // Ensure handleSignUpSubmit is correctly passed
           />
         )}
       </Container>
+      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 }
