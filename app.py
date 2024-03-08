@@ -104,25 +104,95 @@ reviewData = [
     }
 ]
 
-sub_menus = [
+menus = {
+  "menus": [
     {
-        "name": "Starters",
-        "items": [
-            {"name": "Soup of the day", "price": "$5"},
-            {"name": "Bruschetta", "price": "$7"},
-            # Add other starters
-        ],
+      "name": "Breakfast",
+      "subMenus": [
+        {
+          "name": "Main Dishes",
+          "items": [
+            {
+              "name": "Pancakes",
+              "price": "$5.99"
+            },
+            {
+              "name": "Waffles",
+              "price": "$6.99"
+            }
+          ]
+        },
+        {
+          "name": "Sides",
+          "items": [
+            {
+              "name": "Bacon",
+              "price": "$2.99"
+            },
+            {
+              "name": "Fruit Bowl",
+              "price": "$3.99"
+            }
+          ]
+        }
+      ]
     },
-{
-        "name": "Starters",
-        "items": [
-            {"name": "Soup of the day", "price": "$5"},
-            {"name": "Bruschetta", "price": "$7"},
-            # Add other starters
-        ],
+    {
+      "name": "Lunch",
+      "subMenus": [
+        {
+          "name": "Sandwiches",
+          "items": [
+            {
+              "name": "Turkey Club",
+            },
+            {
+              "name": "Grilled Cheese",
+            }
+          ]
+        },
+        {
+          "name": "Salads",
+          "items": [
+            {
+              "name": "Caesar Salad",
+            },
+            {
+              "name": "Garden Salad",
+            }
+          ]
+        }
+      ]
     },
-    # Add other categories
-]
+    {
+      "name": "Dinner",
+      "subMenus": [
+        {
+          "name": "Entrees",
+          "items": [
+            {
+              "name": "Steak",
+            },
+            {
+              "name": "Salmon",
+            }
+          ]
+        },
+        {
+          "name": "Desserts",
+          "items": [
+            {
+              "name": "Cheesecake",
+            },
+            {
+              "name": "Chocolate Cake",
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 
 restaurant_hours = {
     "Breakfast": {"start": "08:00", "end": "11:00"},
@@ -150,7 +220,7 @@ def get_restaurantInfo():
 
 @app.route('/api/menu', methods=['GET'])
 def get_menu():
-    return jsonify(sub_menus)
+    return jsonify(menus)
 
 @app.route('/api/hours', methods=['GET'])
 def get_hours():
@@ -182,15 +252,12 @@ def signup():
     LastName = data.get('lastName')
     Email = data.get('email')
     Password = data.get('password')
-    db_connection = dbConnect()
+    '''db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
             sql = "INSERT INTO BB_USER ()"
     # For this example, let's just return a success message
-    return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
-
-
-
+    return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201'''
 
 @app.route('/')
 def homePage():

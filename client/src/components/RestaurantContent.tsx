@@ -6,6 +6,8 @@ import {
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import CreateIcon from '@mui/icons-material/Create';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 interface RestaurantInfo {
   name: string;
@@ -23,12 +25,16 @@ interface RestaurantHours {
 
 interface MenuItem {
   name: string;
-  price: string;
 }
 
 interface SubMenu {
   name: string;
   items: MenuItem[];
+}
+
+interface Menu {
+  name: string;
+  subMenus: SubMenu[];
 }
 
 const isCurrentTimeWithin = (start: string, end: string): boolean => {
@@ -55,7 +61,9 @@ const findNextMealPeriod = (sortedMeals: [string, MealPeriod][]): { nextMeal: st
 
 const CombinedContent: React.FC = () => {
   const [restaurantImageUrls, setRestaurantImageUrls] = useState<string[]>([]);
-  const [subMenus, setSubMenus] = useState<SubMenu[]>([]);
+  const [menus, setMenus] = useState<Menu[]>([]);
+  const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
+  const [selectedSubMenuIndex, setSelectedSubMenuIndex] = useState(0);
   const [restaurantHours, setRestaurantHours] = useState<RestaurantHours>({});
   const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(null);
   const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
@@ -64,12 +72,15 @@ const CombinedContent: React.FC = () => {
   const [currentMeal, setCurrentMeal] = useState<string>('');
   const [restaurantStatus, setRestaurantStatus] = useState<string>('Closed');
   const [nextOpeningTime, setNextOpeningTime] = useState<string>('');
-
   // Async functions for fetching data
-  const fetchMenu = async () => {
+  const fetchMenus = async () => {
     const response = await fetch('/api/menu');
     const data = await response.json();
-    setSubMenus(data);
+    console.log(data); // Log the fetched menu data
+    setMenus(data.menus); // Make sure to access the `menus` property
+    // Reset the selected menu and submenu indices to ensure they're within bounds
+    setSelectedMenuIndex(0);
+    setSelectedSubMenuIndex(0);
   };
 
   const fetchImages = async () => {
@@ -93,12 +104,11 @@ const CombinedContent: React.FC = () => {
   useEffect(() => {
     // Fetch data only once on component mount
     const fetchData = async () => {
-      await fetchMenu();
+      await fetchMenus();
       await fetchImages();
       await fetchHours();
       await fetchInfo();
     };
-
     fetchData();
   }, []); // Empty dependency array means this effect runs once on mount
 
@@ -240,46 +250,38 @@ const CombinedContent: React.FC = () => {
       <Grid container spacing={2}>
         {/* Menu Section with tabs */}
       <Grid item xs={12} md={7}>
-        <Box
-          sx={{
-            p: 2,
-            boxShadow: 3,
-            borderRadius: '40px',
-            marginBottom: { xs: 2, md: 0 },
-          }}
-        >
-          <Typography style={{ fontWeight: 'bold', fontFamily: 'monospace' }} variant="h4" gutterBottom>
-            Menu
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2 }}>
+          <IconButton onClick={() => setSelectedMenuIndex(Math.max(selectedMenuIndex - 1, 0))}>
+            <ArrowBackIosIcon />
+          </IconButton>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', fontFamily: 'monospace' }}>
+            {menus[selectedMenuIndex]?.name || 'Loading menus...'}
           </Typography>
-          <Tabs
-            value={selectedTab}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-          >
-            {subMenus.map((submenu, index) => (
-              <Tab label={submenu.name} key={index} />
-            ))}
-          </Tabs>
-          {subMenus.map((submenu, index) => (
-            <Box
-              role="tabpanel"
-              hidden={selectedTab !== index}
-              key={index}
-              sx={{ paddingTop: '16px' }}
-            >
-              {selectedTab === index && (
-                <Grid container spacing={2}>
-                  {submenu.items.map((item, itemIndex) => (
-                    <Grid item xs={12} key={itemIndex}>
-                      <Typography sx={{p: 2}} align="left" variant="h6"><strong>{item.name}</strong> - {item.price}</Typography>
-                    </Grid>
-                  ))}
-                </Grid>
-              )}
-            </Box>
-          ))}
+          <IconButton onClick={() => setSelectedMenuIndex(Math.min(selectedMenuIndex + 1, menus.length - 1))}>
+            <ArrowForwardIosIcon />
+          </IconButton>
         </Box>
+
+        <Tabs
+          value={selectedSubMenuIndex}
+          onChange={(event, newValue) => setSelectedSubMenuIndex(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          {menus[selectedMenuIndex]?.subMenus.map((submenu, index) => (
+            <Tab label={submenu.name} key={index} />
+          ))}
+        </Tabs>
+
+        {menus[selectedMenuIndex]?.subMenus[selectedSubMenuIndex]?.items.map((item, itemIndex) => (
+          <Grid container spacing={2} key={itemIndex}>
+            <Grid item xs={12}>
+              <Typography sx={{p: 2}} align="left" variant="h6">
+                <strong>{item.name}</strong>
+              </Typography>
+            </Grid>
+          </Grid>
+        ))}
       </Grid>
 
         {/* Hours Section */}
