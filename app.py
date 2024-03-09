@@ -2,11 +2,14 @@ from flask import Flask, send_from_directory, jsonify, request, session
 from flask_cors import CORS
 import pymysql
 import os
+from random import randint
 from datetime import date
+import re
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 secret = os.urandom(12)
 app.config['SECRET_KEY'] = secret
+
 CORS(app)
 
 def dbConnect():
@@ -295,26 +298,39 @@ def login():
 @app.route('/api/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    FirstName = data.get('firstName')
-    LastName = data.get('lastName')
-    Email = data.get('email')
-    Password = data.get('password')
-    today = date.today()
-    db_connection = dbConnect()
-    try:
-        with db_connection.cursor() as cursor:
-            sql = "SELECT * FROM `BB_User` WHERE Email = %s"
-            cursor.execute(sql, (Email))
-            row = cursor.fetchall()
-            if len(row) > 0:
-                message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
-            else:
-                sql = "INSERT INTO BB_User (First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
-                cursor.execute(sql, (FirstName, LastName, Email, today, Password,))
-                db_connection.commit()
-                message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
-    finally:
-        db_connection.close()
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    email = data.get('email')
+    password = data.get('password')
+    ID = randint(10000000, 99999999)
+    dateToday = date.today()
+    #Regex pattern for valid email
+    if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
+        message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
+    #Regex patterns for valid First and Last names
+    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
+        message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
+        message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+    #Regex pattern for strong password
+    elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
+        message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
+    else:
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                sql = "SELECT * FROM `BB_User` WHERE Email = %s"
+                cursor.execute(sql, (email))
+                row = cursor.fetchall()
+                if len(row) > 0:
+                    message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
+                else:
+                    sql = "INSERT INTO BB_User (User_ID, First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
+                    cursor.execute(sql, (ID, firstName, lastName, email, dateToday, password,))
+                    db_connection.commit()
+                    message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
+        finally:
+            db_connection.close()
     return message
 
 @app.route('/api/logout', methods=['POST'])
