@@ -1,6 +1,7 @@
 from flask import Flask, send_from_directory, jsonify, request
 from flask_cors import CORS
 import pymysql
+import os
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 CORS(app)
@@ -28,7 +29,7 @@ restaurantImages = [
 ]
 
 '''
-reviewData = [
+reviewData2 = [
     {
         "title": "Delicious and Affordable",
         "rating": 5,
@@ -103,10 +104,101 @@ reviewData = [
         "content": "The mac and cheese slaps"
     }
 ]
+
+menus2 = {
+  "menus": [
+    {
+      "name": "Breakfast",
+      "subMenus": [
+        {
+          "name": "Main Dishes",
+          "items": [
+            {
+              "name": "Pancakes"
+            },
+            {
+              "name": "Waffles"
+
+            }
+          ]
+        },
+        {
+          "name": "Sides",
+          "items": [
+            {
+              "name": "Bacon"
+            },
+            {
+              "name": "Fruit Bowl"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lunch",
+      "subMenus": [
+        {
+          "name": "Sandwiches",
+          "items": [
+            {
+              "name": "Turkey Club",
+            },
+            {
+              "name": "Grilled Cheese",
+            }
+          ]
+        },
+        {
+          "name": "Salads",
+          "items": [
+            {
+              "name": "Caesar Salad",
+            },
+            {
+              "name": "Garden Salad",
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dinner",
+      "subMenus": [
+        {
+          "name": "Entrees",
+          "items": [
+            {
+              "name": "Steak",
+            },
+            {
+              "name": "Salmon",
+            }
+          ]
+        },
+        {
+          "name": "Desserts",
+          "items": [
+            {
+              "name": "Cheesecake",
+            },
+            {
+              "name": "Chocolate Cake",
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+restaurant_hours2 = {
+    "Breakfast": {"start": "08:00", "end": "11:00"},
+    "Lunch": {"start": "12:00", "end": "14:00"},
+    "Dinner": {"start": "18:00", "end": "20:00"},
+    "Extended": {"start": "21:00", "end": "24:00"},
+}
 '''
-
-
-
 
 @app.route('/api/restaurantInfo', methods=['GET'])
 def get_restaurantInfo():
@@ -117,34 +209,16 @@ def get_restaurantInfo():
             sql = "SELECT Dining_Name, Dining_Description FROM `BB_Dining` WHERE BB_DiningID = %s"
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchone()
-            restaurantInfo = {"name": info[0], "description": info[1]}
+            restaurantInfo = {
+                "name": info[0],
+                "description": info[1]
+            }
     finally:
         db_connection.close()
     return jsonify(restaurantInfo)
 
-sub_menus = [
-    {
-        "name": "Starters",
-        "items": [
-            {"name": "Soup of the day", "price": "$5"},
-            {"name": "Bruschetta", "price": "$7"},
-            # Add other starters
-        ],
-    },
-{
-        "name": "Starters",
-        "items": [
-            {"name": "Soup of the day", "price": "$5"},
-            {"name": "Bruschetta", "price": "$7"},
-            # Add other starters
-        ],
-    },
-    # Add other categories
-]
-
 @app.route('/api/menu', methods=['GET'])
 def get_menu():
-    '''
     restaurantID = 2
     db_connection = dbConnect()
     try:
@@ -152,20 +226,44 @@ def get_menu():
             sql = "SELECT Menu_Heading, Menu_Subheading, Menu_Item FROM `BB_Menu` WHERE BB_DiningID = %s"
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchall()
-            #sub_menus2 = []
-            breakfast, lunch, dinner, extended = [], [],[],[]
+
+            result = []
             for row in info:
-                if row[0] == 'Breakfast':
-                    for
+                heading, subheading, item = row
 
-                #sub_menus2.append
+                # Check if the heading already exists in the result list
+                heading_exists = False
+                for menu in result:
+                    if menu['name'] == heading:
+                        heading_exists = True
+                        heading_menu = menu
+                        break
 
+                # If heading doesn't exist, add it to the result list
+                if not heading_exists:
+                    heading_menu = {"name": heading, "subMenus": []}
+                    result.append(heading_menu)
 
+                # Check if the subheading already exists in the heading's submenus
+                subheading_exists = False
+                for submenu in heading_menu['subMenus']:
+                    if submenu['name'] == subheading:
+                        subheading_exists = True
+                        subheading_menu = submenu
+                        break
+
+                # If subheading doesn't exist, add it to the heading's submenus
+                if not subheading_exists:
+                    subheading_menu = {"name": subheading, "items": []}
+                    heading_menu['subMenus'].append(subheading_menu)
+
+                # Add the item to the subheading's items list
+                subheading_menu['items'].append({"name": item})
+
+            menus = {"menus": result}
     finally:
         db_connection.close()
-    '''
-
-    return jsonify(sub_menus)
+    return jsonify(menus)
 
 @app.route('/api/hours', methods=['GET'])
 def get_hours():
@@ -191,23 +289,23 @@ def get_hours():
         db_connection.close()
     return jsonify(restaurant_hours)
 
-
 @app.route('/api/reviews', methods=['GET'])
 def get_reviews():
-    restaurantID = 1
+    restaurantID = 2
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
-            sql = ("SELECT r.Review_Title, r.Review_Rating, r.Review_Picture, u.User_PFP, u.First_Name, r.Review_Comment FROM BB_Review r "
-                   "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s" )
+            sql = (
+                "SELECT r.Review_Title, r.Review_Rating, r.Review_Picture, u.User_PFP, u.First_Name, r.Review_Comment FROM BB_Review r "
+                "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s")
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchall()
-            print("hello")
             reviewData = []
             for row in info:
                 photos = row[2].split()
-                reviewData.append({"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[3],
-                                    "userName": row[4], "content": row[5]})
+                reviewData.append(
+                    {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[3],
+                     "userName": row[4], "content": row[5]})
     finally:
         db_connection.close()
     return jsonify(reviewData)
@@ -234,24 +332,24 @@ def signup():
     LastName = data.get('lastName')
     Email = data.get('email')
     Password = data.get('password')
-    print(Email)
-    print(Password)
-    print (FirstName)
-    print (LastName)
+    '''db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "INSERT INTO BB_USER ()"
     # For this example, let's just return a success message
-    return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
+    return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201'''
 
-
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
-    if path.startswith("api/"):
-        # If the path starts with api/, return a 404 error or similar
-        # since this route should be caught by one of the above API route handlers
-        return "Not Found", 404
+@app.route('/')
+def homePage():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/restaurant')
+def restaurantPage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/login')
+def loginPage():
+    return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
