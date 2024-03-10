@@ -7,27 +7,37 @@ from datetime import date
 import re
 import boto3
 import uuid
+from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 secret = os.urandom(12)
 app.config['SECRET_KEY'] = secret
-
 CORS(app)
+load_dotenv()
+
+S3_KEY_ID = os.environ.get("S3_KEY_ID")
+S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY")
+RDS_HOST = os.environ.get("RDS_HOST")
+RDS_USER = os.environ.get("RDS_USER")
+RDS_PASSWORD = os.environ.get("RDS_PASSWORD")
+
+if not all([S3_KEY_ID, S3_SECRET_KEY, RDS_HOST, RDS_USER, RDS_PASSWORD]):
+    raise ValueError("One or more environment variables are not set.")
 
 s3_client = boto3.client(
     's3',
-    aws_access_key_id='AKIA6ODU6BOOZSQAK4WE',
-    aws_secret_access_key='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',
+    aws_access_key_id=S3_KEY_ID,
+    aws_secret_access_key=S3_SECRET_KEY,
     region_name='us-east-2'
 )
 BUCKET_NAME = 'bruinbitescdn'
 
 def dbConnect():
     return pymysql.connect(
-        host="bruin-bites.ctamuwuo6it1.us-east-2.rds.amazonaws.com",
+        host=RDS_HOST,
         port=3306,
-        user="admin",
-        passwd="bruinbites",
+        user=RDS_USER,
+        passwd=RDS_PASSWORD,
         db="BruinBites"
     )
 
