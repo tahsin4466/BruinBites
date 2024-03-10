@@ -27,12 +27,12 @@ interface CombinedLoginProps {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; // Or Promise<void> if it's asynchronous
 }
 
-export default function CombinedLogin({ onToggleForm }: CombinedLoginProps) {
+export default function CombinedLogin({ onToggleForm, onSubmit }: CombinedLoginProps) {
   // State hooks for email and password inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
   };
 
@@ -42,8 +42,7 @@ export default function CombinedLogin({ onToggleForm }: CombinedLoginProps) {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Implement your logic to submit email and password to the backend here
-    console.log('Submitting:', email, password);
+    onSubmit(event); // This should work without errors now
   };
 
   const responseGoogle = (response: any) => {
