@@ -1,17 +1,43 @@
-from flask import Flask, send_from_directory, jsonify, request
+from flask import Flask, send_from_directory, jsonify, request, session
 from flask_cors import CORS
 import pymysql
 import os
+from random import randint
+from datetime import date
+import re
+import boto3
+import uuid
+from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
+secret = os.urandom(12)
+app.config['SECRET_KEY'] = secret
 CORS(app)
+load_dotenv()
+
+S3_KEY_ID = os.environ.get("S3_KEY_ID")
+S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY")
+RDS_HOST = os.environ.get("RDS_HOST")
+RDS_USER = os.environ.get("RDS_USER")
+RDS_PASSWORD = os.environ.get("RDS_PASSWORD")
+
+if not all([S3_KEY_ID, S3_SECRET_KEY, RDS_HOST, RDS_USER, RDS_PASSWORD]):
+    raise ValueError("One or more environment variables are not set.")
+
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=S3_KEY_ID,
+    aws_secret_access_key=S3_SECRET_KEY,
+    region_name='us-east-2'
+)
+BUCKET_NAME = 'bruinbitescdn'
 
 def dbConnect():
     return pymysql.connect(
-        host="bruin-bites.ctamuwuo6it1.us-east-2.rds.amazonaws.com",
+        host=RDS_HOST,
         port=3306,
-        user="admin",
-        passwd="bruinbites",
+        user=RDS_USER,
+        passwd=RDS_PASSWORD,
         db="BruinBites"
     )
 
@@ -201,6 +227,34 @@ restaurant_hours = {
     "Extended": {"start": "21:00", "end": "24:00"},
 }
 
+@app.route('/api/userImage', methods=['GET'])
+def get_userImage():
+    if 'id' in session:
+        print("In session")
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                sql = "SELECT User_PFP FROM BB_User WHERE User_ID = %s"
+                cursor.execute(sql, (session.get('id'),))
+                info = cursor.fetchone()
+                print(info)
+                userPFP = {
+                    "imageURL": info[0],
+                    "loggedIn": "true"
+                }
+        finally:
+            db_connection.close()
+        print("sent user image")
+    else:
+        userPFP = {
+            "imageURL": "",
+            "loggedIn": "false"
+        }
+        print("sent default image")
+
+    print(userPFP)
+    return jsonify(userPFP)
+
 @app.route('/api/restaurantInfo', methods=['GET'])
 def get_restaurantInfo():
     restaurantID = 2
@@ -238,26 +292,142 @@ def login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    print(email)
-    print(password)
-    if email and password:
-        return jsonify({'message': 'Login successful', 'status': 'success'}), 200
-    else:
-        return jsonify({'message': 'Missing credentials', 'status': 'error'}), 400
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Password, User_ID FROM `BB_User` WHERE Email = %s"
+            cursor.execute(sql, (email,))
+            row = cursor.fetchall()
+            if len(row) == 0:
+                print("Invalid email")
+                message = jsonify({'message': 'User does not exist', 'status': 'failure'}), 404
+            elif len(row) > 1:
+                print("Email already registered")
+                message = jsonify({'message': 'Database error, duplicate entry', 'status': 'failure'}), 400
+            elif row[0][0] != password:
+                print("Invalid password")
+                message = jsonify({'message': 'Incorrect password', 'status': 'failure'}), 401
+            else:
+                print("Logged in successfully")
+                session['id'] = row[0][1]
+                message = jsonify({'message': 'Login successful', 'status': 'success'}), 202
+    finally:
+        db_connection.close()
+    return message
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
     data = request.get_json()
-    FirstName = data.get('firstName')
-    LastName = data.get('lastName')
-    Email = data.get('email')
-    Password = data.get('password')
-    '''db_connection = dbConnect()
+    firstName = data.get('firstName')
+    lastName = data.get('lastName')
+    email = data.get('email')
+    password = data.get('password')
+    ID = randint(10000000, 99999999)
+    dateToday = date.today()
+    #Regex pattern for valid email
+    if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
+        message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
+    #Regex patterns for valid First and Last names
+    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
+        message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
+        message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+    #Regex pattern for strong password
+    elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
+        message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
+    else:
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                sql = "SELECT * FROM `BB_User` WHERE Email = %s"
+                cursor.execute(sql, (email))
+                row = cursor.fetchall()
+                if len(row) > 0:
+                    message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
+                else:
+                    sql = "INSERT INTO BB_User (User_ID, First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
+                    cursor.execute(sql, (ID, firstName, lastName, email, dateToday, password,))
+                    db_connection.commit()
+                    message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
+        finally:
+            db_connection.close()
+    return message
+
+@app.route('/api/checkReviewStatus', methods=['GET'])
+def checkReviewStatus():
+    print("checking review status")
+    diningID = 2
+    userID = session.get('id')
+    db_connection = dbConnect()
+    dateToday = date.today()
     try:
         with db_connection.cursor() as cursor:
-            sql = "INSERT INTO BB_USER ()"
-    # For this example, let's just return a success message
-    return jsonify({'message': 'Sign up successful', 'status': 'success'}), 201'''
+            sql = "SELECT (Review_Date) FROM BB_Review WHERE User_ID = %s AND BB_DiningID = %s;"
+            cursor.execute(sql, (userID, diningID,))
+            row = cursor.fetchone()
+            if len(row) != 0 and row[0] == dateToday:
+                print("User submitted a review today!")
+                message = jsonify({"hasSubmitted": True}), 200
+            else:
+                print("User has not reviewed today")
+                message = jsonify({"hasSubmitted": False}), 200
+    finally:
+        db_connection.close()
+    return message
+@app.route('/api/reviewUpload', methods=['POST'])
+def upload_review():
+    files = request.files.getlist('images')
+    imageUrls = []
+
+    title = request.form.get('title')
+    content = request.form.get('content')
+    rating = request.form.get('rating')
+    restaurantID = 2
+    userID = session.get('id')
+    dateToday = date.today()
+    message = jsonify({'message': 'Review submission failed', 'status': 'failure'}), 400
+
+    # Upload images to S3 and get their URLs
+    for file in files:
+        file_name = f'reviews/{uuid.uuid4()}-{file.filename}'
+        s3_client.upload_fileobj(
+            file,
+            BUCKET_NAME,
+            file_name,
+        )
+        imageUrl = f'https://{BUCKET_NAME}.s3.amazonaws.com/{file_name}'
+        imageUrls.append(imageUrl)
+
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "INSERT INTO BB_Review (BB_DiningID, User_ID, Review_Title, Review_Comment, Review_Rating, Review_Date) VALUES (%s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, (restaurantID, userID, title, content, rating, dateToday))
+            db_connection.commit()
+            reviewID = cursor.lastrowid
+            sql = "INSERT INTO BB_Images (Review_ID, Image_URL) VALUES (%s, %s)"
+            for imageUrl in imageUrls:
+                cursor.execute(sql, (reviewID, imageUrl))
+            db_connection.commit()
+            message = jsonify({'message': 'Review submission succeeded', 'status': 'success'}), 200
+    finally:
+        db_connection.close()
+
+    return message
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    print("Popped the session")
+    session.pop('id', None)
+    return jsonify({"success": True, "message": "You have been logged out successfully."}), 200
+
+#Page routing
+@app.route('/api/session')
+def check_session():
+    if 'id' in session:
+        return jsonify({'isAuthenticated': True})
+    else:
+        return jsonify({'isAuthenticated': False})
 
 @app.route('/')
 def homePage():
