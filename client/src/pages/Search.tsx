@@ -117,20 +117,7 @@ function Search() {
                     <Typography variant="body2">{restaurant.description}</Typography>
                   </div>
                 </CardContent>
-                {/* Collapse component for detailed view */}
-                <Collapse in={expanded === index} timeout="auto" unmountOnExit>
-                  <CardContent>
-                    {/* Detailed content goes here */}
-                  </CardContent>
-                </Collapse>
-                {/* Expand button */}
-                <IconButton
-                  onClick={() => handleExpand(index)}
-                  aria-expanded={expanded === index}
-                  aria-label="show more"
-                >
-                  <ExpandMoreIcon />
-                </IconButton>
+
               </Card>
             </Grid>
           ))}

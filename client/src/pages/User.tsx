@@ -1,23 +1,40 @@
 import React from 'react';
 import HeaderMenu from '../components/HeaderMenu';
-import { Box, Typography } from '@mui/material';
+import ReviewsList from '../components/ReviewList'; // Import the ReviewsList component
+import { Container, Grid, Avatar, Typography } from '@mui/material';
 
-function User() {
+const User: React.FC = () => {
+  // Sample user information
+  const user = {
+    name: 'John Doe',
+    profilePhoto: 'https://source.unsplash.com/random',
+    email: 'johndoe@example.com',
+    password: 'example',
+  };
+
   return (
     <>
-    <div style={{ height: '100vh', overflow: 'auto' }}>
-      <Box style={{ position: 'fixed', width: '100%', zIndex: 1000 }}>
-        <HeaderMenu />
-      </Box>
-      <Box p={2} mt={4}> {/* Add mt={12} to create space below the fixed header */}
-        <Typography variant="h4" align="center" mt={4}>
-          User Profile
-        </Typography>
-        {/* Add user profile content here */}
-      </Box>
-    </div>
+      <HeaderMenu />
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Grid container spacing={4}>
+          {/* Left column for user information */}
+          <Grid item xs={12} md={4}>
+            <Avatar src={user.profilePhoto} sx={{ width: 150, height: 150, marginBottom: 2 }} />
+            <Typography variant="h5" align="center" gutterBottom>
+              {user.name}
+            </Typography>
+            <Typography variant="body1" align="center" gutterBottom>
+              {user.email}
+            </Typography>
+          </Grid>
+          {/* Right column for reviews */}
+          <Grid item xs={12} md={8}>
+            <ReviewsList />
+          </Grid>
+        </Grid>
+      </Container>
     </>
   );
-}
+};
 
 export default User;
