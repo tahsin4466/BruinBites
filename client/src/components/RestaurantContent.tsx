@@ -11,6 +11,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline';
 import axios from 'axios';
 
+
 interface RestaurantInfo {
   name: string;
   description: string;

@@ -54,7 +54,8 @@ restaurantImages = [
     "https://i.insider.com/59f2479ccfad392f0d755979?width=600&format=jpeg&auto=webp",
 ]
 
-reviewData = [
+'''
+reviewData2 = [
     {
         "title": "Delicious and Affordable",
         "rating": 5,
@@ -130,102 +131,13 @@ reviewData = [
     }
 ]
 
-menus = {
-  "menus": [
-    {
-      "name": "Breakfast",
-      "subMenus": [
-        {
-          "name": "Main Dishes",
-          "items": [
-            {
-              "name": "Pancakes",
-              "price": "$5.99"
-            },
-            {
-              "name": "Waffles",
-              "price": "$6.99"
-            }
-          ]
-        },
-        {
-          "name": "Sides",
-          "items": [
-            {
-              "name": "Bacon",
-              "price": "$2.99"
-            },
-            {
-              "name": "Fruit Bowl",
-              "price": "$3.99"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Lunch",
-      "subMenus": [
-        {
-          "name": "Sandwiches",
-          "items": [
-            {
-              "name": "Turkey Club",
-            },
-            {
-              "name": "Grilled Cheese",
-            }
-          ]
-        },
-        {
-          "name": "Salads",
-          "items": [
-            {
-              "name": "Caesar Salad",
-            },
-            {
-              "name": "Garden Salad",
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Dinner",
-      "subMenus": [
-        {
-          "name": "Entrees",
-          "items": [
-            {
-              "name": "Steak",
-            },
-            {
-              "name": "Salmon",
-            }
-          ]
-        },
-        {
-          "name": "Desserts",
-          "items": [
-            {
-              "name": "Cheesecake",
-            },
-            {
-              "name": "Chocolate Cake",
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-
-restaurant_hours = {
+restaurant_hours2 = {
     "Breakfast": {"start": "08:00", "end": "11:00"},
     "Lunch": {"start": "12:00", "end": "14:00"},
     "Dinner": {"start": "18:00", "end": "20:00"},
     "Extended": {"start": "21:00", "end": "24:00"},
 }
+'''
 
 @app.route('/api/userImage', methods=['GET'])
 def get_userImage():
@@ -274,14 +186,95 @@ def get_restaurantInfo():
 
 @app.route('/api/menu', methods=['GET'])
 def get_menu():
+    restaurantID = 2
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Menu_Heading, Menu_Subheading, Menu_Item FROM `BB_Menu` WHERE BB_DiningID = %s"
+            cursor.execute(sql, (restaurantID,))
+            info = cursor.fetchall()
+
+            result = []
+            for row in info:
+                heading, subheading, item = row
+
+                # Check if the heading already exists in the result list
+                heading_exists = False
+                for menu in result:
+                    if menu['name'] == heading:
+                        heading_exists = True
+                        heading_menu = menu
+                        break
+
+                # If heading doesn't exist, add it to the result list
+                if not heading_exists:
+                    heading_menu = {"name": heading, "subMenus": []}
+                    result.append(heading_menu)
+
+                # Check if the subheading already exists in the heading's submenus
+                subheading_exists = False
+                for submenu in heading_menu['subMenus']:
+                    if submenu['name'] == subheading:
+                        subheading_exists = True
+                        subheading_menu = submenu
+                        break
+
+                # If subheading doesn't exist, add it to the heading's submenus
+                if not subheading_exists:
+                    subheading_menu = {"name": subheading, "items": []}
+                    heading_menu['subMenus'].append(subheading_menu)
+
+                # Add the item to the subheading's items list
+                subheading_menu['items'].append({"name": item})
+
+            menus = {"menus": result}
+    finally:
+        db_connection.close()
     return jsonify(menus)
 
 @app.route('/api/hours', methods=['GET'])
 def get_hours():
+    restaurantID = 1
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Dining_Breakfast, Dining_Lunch, Dining_Dinner, Dining_Extended FROM `BB_Dining` WHERE BB_DiningID = %s"
+            cursor.execute(sql, (restaurantID,))
+            info = cursor.fetchone()
+            times = []
+            for time_range in info:
+                start_time, end_time = time_range.split()
+                times.append(start_time)
+                times.append(end_time)
+            restaurant_hours = {
+                "Breakfast": {"start": times[0], "end": times[1]},
+                "Lunch": {"start": times[2], "end": times[3]},
+                "Dinner": {"start": times[4], "end": times[5]},
+                "Extended": {"start": times[6], "end": times[7]},
+            }
+    finally:
+        db_connection.close()
     return jsonify(restaurant_hours)
 
 @app.route('/api/reviews', methods=['GET'])
 def get_reviews():
+    restaurantID = 2
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = (
+                "SELECT r.Review_Title, r.Review_Rating, r.Review_Picture, u.User_PFP, u.First_Name, r.Review_Comment FROM BB_Review r "
+                "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s")
+            cursor.execute(sql, (restaurantID,))
+            info = cursor.fetchall()
+            reviewData = []
+            for row in info:
+                photos = row[2].split()
+                reviewData.append(
+                    {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[3],
+                     "userName": row[4], "content": row[5]})
+    finally:
+        db_connection.close()
     return jsonify(reviewData)
 
 @app.route('/api/restaurantImages', methods=['GET'])
@@ -317,41 +310,52 @@ def login():
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
-    data = request.get_json()
-    firstName = data.get('firstName')
-    lastName = data.get('lastName')
-    email = data.get('email')
-    password = data.get('password')
-    ID = randint(10000000, 99999999)
-    dateToday = date.today()
-    #Regex pattern for valid email
-    if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
-        message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
-    #Regex patterns for valid First and Last names
-    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
-        message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
-    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
-        message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
-    #Regex pattern for strong password
-    elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
-        message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
-    else:
-        db_connection = dbConnect()
-        try:
-            with db_connection.cursor() as cursor:
-                sql = "SELECT * FROM `BB_User` WHERE Email = %s"
-                cursor.execute(sql, (email))
-                row = cursor.fetchall()
-                if len(row) > 0:
-                    message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
-                else:
-                    sql = "INSERT INTO BB_User (User_ID, First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
-                    cursor.execute(sql, (ID, firstName, lastName, email, dateToday, password,))
-                    db_connection.commit()
-                    message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
+  firstName = data.get('firstName')
+  lastName = data.get('lastName')
+  email = data.get('email')
+  password = data.get('password')
+  ID = randint(10000000, 99999999)
+  dateToday = date.today()
+  #Regex pattern for valid email
+  if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
+      message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
+  #Regex patterns for valid First and Last names
+  elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
+      message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+  elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
+      message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+  #Regex pattern for strong password
+  elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
+      message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
+  else:
+      db_connection = dbConnect()
+      try:
+          with db_connection.cursor() as cursor:
+              sql = "SELECT * FROM `BB_User` WHERE Email = %s"
+              cursor.execute(sql, (email))
+              row = cursor.fetchall()
+              if len(row) > 0:
+                  message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
+              else:
+                  sql = "INSERT INTO BB_User (User_ID, First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
+                  cursor.execute(sql, (ID, firstName, lastName, email, dateToday, password,))
+                  db_connection.commit()
+                  message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
         finally:
             db_connection.close()
     return message
+
+@app.route('/')
+def homePage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/restaurant')
+def restaurantPage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/login')
+def loginPage():
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/api/checkReviewStatus', methods=['GET'])
 def checkReviewStatus():
