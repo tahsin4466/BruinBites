@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -8,52 +8,68 @@ import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import LockPersonIcon from '@mui/icons-material/LockPerson';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import GoogleLogin from 'react-google-login';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-
-const defaultTheme = createTheme();
 
 declare global {
   interface Window {
-    onSignIn: (googleUser: any) => void;
+    onSignIn: (googleUser: any) => void; // Adjust the type of googleUser as needed
   }
 }
 
-interface CombinedLoginProps {
+// Add Google Sign-In button component
+import GoogleLogin from 'react-google-login';
+
+const defaultTheme = createTheme();
+
+type LoginSheetProps = {
   onToggleForm: () => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void; // Or Promise<void> if it's asynchronous
-}
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  setUsername: React.Dispatch<React.SetStateAction<string>>;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  // Add any additional props needed for handling Google Sign-In
+};
 
-export default function CombinedLogin({ onToggleForm, onSubmit }: CombinedLoginProps) {
-  // State hooks for email and password inputs
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
+export default function SignIn(props: LoginSheetProps) {
+  // Function to handle username input change
+  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    props.setUsername(event.target.value);
   };
 
+  // Function to handle password input change
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value);
+    props.setPassword(event.target.value);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    onSubmit(event); // This should work without errors now
-  };
+const responseGoogle = (response: any) => {
+  const profile = response.profileObj;
+  console.log('Google profile', profile);
+  // Check if the email domain is @ucla.edu
+  if (profile.email.endsWith('@ucla.edu')) {
+    console.log('Authenticated UCLA user:', profile.email);
+    // Proceed with your sign-in process, such as setting user state or redirecting
+  } else {
+    console.log('Non-UCLA email detected. Access denied.');
+    // Optionally, you can notify the user they must use a UCLA email
+    // You might also want to sign the user out immediately if they're not authorized
+    signOut();
+  }
+};
 
-  const responseGoogle = (response: any) => {
-    const profile = response.profileObj;
-    console.log('Google profile', profile);
-    // Implement your Google Sign-In logic here
-  };
+// Add the signOut function if it's not already defined
+const signOut = () => {
+  const auth2 = window.gapi.auth2.getAuthInstance();
+  auth2.signOut().then(function () {
+    console.log('User signed out.');
+  });
+};
 
+  // Handle Google Sign-In failure
   const handleFailure = (error: any) => {
     console.log('Google Sign-In failed', error);
-    // Optionally handle sign-in failure
+    // Optionally handle sign-in failure, e.g., show an error message
   };
 
   return (
@@ -69,22 +85,22 @@ export default function CombinedLogin({ onToggleForm, onSubmit }: CombinedLoginP
           }}
         >
           <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
+            <LockPersonIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            Log in
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <Box component="form" onSubmit={props.onSubmit} noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email"
-              name="email"
-              autoComplete="email"
+              id="username"
+              label="Username"
+              name="username"
+              autoComplete="username"
               autoFocus
-              onChange={handleEmailChange}
+              onChange={handleUsernameChange}
             />
             <TextField
               margin="normal"
@@ -121,7 +137,7 @@ export default function CombinedLogin({ onToggleForm, onSubmit }: CombinedLoginP
             </Box>
             <Grid container>
               <Grid item>
-                <Link href="#" variant="body2" onClick={onToggleForm}>
+                <Link href="#" variant="body2" onClick={props.onToggleForm}>
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>

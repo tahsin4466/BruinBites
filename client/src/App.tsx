@@ -1,107 +1,100 @@
-import React, { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/home';
-import LoginPage from "./pages/Login";
-import Leaderboard from './pages/Leaderboard'; // Adjust the path based on the actual location of your 'Leaderboard' component
-import Search from './pages/Search'; // Adjust the path based on the actual location of your 'Leaderboard' component
-import User from './pages/User'; // Adjust the path based on the actual location of your 'Leaderboard' component
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+
+// Import your page components
+import Home from './pages/Home';
+import LoginPage from './pages/Login';
+import Leaderboard from './pages/Leaderboard';
+import Search from './pages/Search';
+import User from './pages/User';
 import Restaurant from './pages/Restaurant';
 
-interface ApiResponse {
-  message: string;
+// Authentication Context Setup
+interface AuthContextType {
+  isAuthenticated: boolean;
+  login: () => void;
+  logout: () => void;
 }
 
-function App() {
-  const [data, setData] = useState<ApiResponse | null>(null); // Specify ApiResponse as the type
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-  useEffect(() => {
-    // Fetch data from Flask API when the component mounts
-    axios.get('/api/data')
-      .then(response => {
-        setData(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, []);
+const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
-  const handleSubmit = () => {
-    // Example of submitting data to Flask API
-    const formData = { key: 'value' }; // Your form data
-    axios.post('/api/submit', formData)
-      .then(response => {
-        console.log('Data submitted successfully:', response.data);
-      })
-      .catch(error => {
-        console.error('Error submitting data:', error);
-      });
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  const login = () => setIsAuthenticated(true);
+  const logout = () => {
+    setIsAuthenticated(false);
+    // Call your API to invalidate the session
+    axios.post('/api/logout').then(() => {
+      console.log("Logged out successfully.");
+    });
   };
 
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/restaurant" element={<Restaurant />} />
-        <Route path="/profile" element={<User />} />
-        <Route path="/search" element={<Search />} />
-
-
-
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
-        
-/*
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-=======
-import React from 'react';
-import Home from './pages/Restaurant';
-
-function App() {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    // Fetch data from Flask API when the component mounts
-    axios.get('/api/data')
-      .then(response => {
-        setData(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, []);
-
-  const handleSubmit = () => {
-    // Example of submitting data to Flask API
-    const formData = { key: 'value' }; // Your form data
-    axios.post('/api/submit', formData)
-      .then(response => {
-        console.log('Data submitted successfully:', response.data);
-      })
-      .catch(error => {
-        console.error('Error submitting data:', error);
-      });
+  const checkSession = async () => {
+    try {
+      const response = await axios.get('/api/session');
+      setIsAuthenticated(response.data.isAuthenticated);
+    } catch (error) {
+      console.error('Error checking session:', error);
+      setIsAuthenticated(false);
+    }
   };
 
+  // Check session on component mount
+  useEffect(() => {
+    checkSession();
+  }, []);
+
   return (
-    <div>
-      {data ? (
-        <p>{data.message}</p>
-      ) : (
-        <p>Loading...</p>
-      )}
-      <button onClick={handleSubmit}>Submit Data</button>
-    </div>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
+};
+
+// Protected Route Component
+interface ProtectedRouteProps {
+  element: JSX.Element;
 }
 
-export default App;
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return element;
+};
 
- */
+// App Component with Routes
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/leaderboard" element={<ProtectedRoute element={<Leaderboard />} />} />
+          <Route path="/restaurant" element={<ProtectedRoute element={<Restaurant />} />} />
+          <Route path="/profile" element={<ProtectedRoute element={<User />} />} />
+          <Route path="/search" element={<ProtectedRoute element={<Search />} />} />
+          {/* Define more routes as needed */}
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
+};
+
+export default App;
