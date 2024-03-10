@@ -49,80 +49,88 @@ const User: React.FC = () => {
         <Grid container spacing={4}>
           {/* Left column for user information */}
           <Grid item xs={12} md={4}>
-            <Avatar src={profilePhoto} sx={{ width: 150, height: 150, marginBottom: 2 }} />
-            <Typography variant="h5" align="center" gutterBottom sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-              {name}
-            </Typography>
-            <Typography variant="body1" align="center" gutterBottom sx={{ fontFamily: 'monospace' }}>
-              {email}
-            </Typography>
+            <div style={{maxHeight: 'calc(100vh - 64px)', overflowY: 'auto'}}>
 
-            {/* Text fields and buttons for editing user information */}
-            <Grid container spacing={1}  sx={{ marginBottom: 2 }}>
-              <Grid item xs={8}>
-                <TextField
-                  label="New Name"
-                  variant="outlined"
-                  value={name}
-                  onChange={handleNameChange}
-                  fullWidth
-                />
+
+              <Avatar src={profilePhoto} sx={{width: 150, height: 150, marginBottom: 2}}/>
+              <Typography variant="h5" align="center" gutterBottom sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>
+                {name}
+              </Typography>
+              <Typography variant="body1" align="center" gutterBottom sx={{fontFamily: 'monospace'}}>
+                {email}
+              </Typography>
+
+              {/* Text fields and buttons for editing user information */}
+              <Grid container spacing={1} sx={{marginBottom: 2}}>
+                <Grid item xs={8}>
+                  <TextField
+                      label="New Name"
+                      variant="outlined"
+                      value={name}
+                      onChange={handleNameChange}
+                      fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button variant="outlined" onClick={handleNameSubmit} fullWidth>
+                    Change Name
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={4}>
-                <Button variant="outlined" onClick={handleNameSubmit} fullWidth>
-                  Change Name
-                </Button>
+              <Grid container spacing={1} sx={{marginBottom: 2}}>
+                <Grid item xs={8}>
+                  <TextField
+                      label="New Profile Photo URL"
+                      variant="outlined"
+                      value={profilePhoto}
+                      onChange={handleProfilePhotoChange}
+                      fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button variant="outlined" onClick={handleProfilePhotoSubmit} fullWidth>
+                    Change Photo Pic
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid container spacing={1}  sx={{ marginBottom: 2 }}>
-              <Grid item xs={8}>
-                <TextField
-                  label="New Profile Photo URL"
-                  variant="outlined"
-                  value={profilePhoto}
-                  onChange={handleProfilePhotoChange}
-                  fullWidth
-                />
+              <Grid container spacing={1} sx={{marginBottom: 2}}>
+                <Grid item xs={8}>
+                  <TextField
+                      label="New Email"
+                      variant="outlined"
+                      value={email}
+                      onChange={handleEmailChange}
+                      fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button variant="outlined" onClick={handleEmailSubmit} fullWidth>
+                    Change Email
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={4}>
-                <Button variant="outlined" onClick={handleProfilePhotoSubmit} fullWidth>
-                  Change Photo Pic
-                </Button>
+              <Grid container spacing={1} sx={{marginBottom: 2}}>
+                <Grid item xs={8}>
+                  <TextField
+                      label="New Password"
+                      variant="outlined"
+                      type="password"
+                      value={password}
+                      onChange={handlePasswordChange}
+                      fullWidth
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <Button variant="outlined" onClick={handlePasswordSubmit} fullWidth>
+                    Change Password
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid container spacing={1}  sx={{ marginBottom: 2 }}>
-              <Grid item xs={8}>
-                <TextField
-                  label="New Email"
-                  variant="outlined"
-                  value={email}
-                  onChange={handleEmailChange}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <Button variant="outlined" onClick={handleEmailSubmit} fullWidth>
-                  Change Email
-                </Button>
-              </Grid>
-            </Grid>
-            <Grid container spacing={1}  sx={{ marginBottom: 2 }}>
-              <Grid item xs={8}>
-                <TextField
-                  label="New Password"
-                  variant="outlined"
-                  type="password"
-                  value={password}
-                  onChange={handlePasswordChange}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <Button variant="outlined" onClick={handlePasswordSubmit} fullWidth>
-                  Change Password
-                </Button>
-              </Grid>
-            </Grid>
+              {/* extra padding for the end*/}
+              <Typography variant="body1" align="center" gutterBottom sx={{fontFamily: 'monospace'}}>
+                  ‎ ‎ ‎ ‎
+              </Typography>
+            </div>
           </Grid>
           {/* Right column for reviews */}
           <Grid item xs={12} md={8}>
