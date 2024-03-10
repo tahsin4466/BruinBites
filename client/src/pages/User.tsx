@@ -1,7 +1,7 @@
 import React from 'react';
 import HeaderMenu from '../components/HeaderMenu';
 import ReviewsList from '../components/ReviewList'; // Import the ReviewsList component
-import { Container, Grid, Avatar, Typography } from '@mui/material';
+import { Container, Grid, Avatar, Typography, Button } from '@mui/material';
 
 const User: React.FC = () => {
   // Sample user information
@@ -26,6 +26,22 @@ const User: React.FC = () => {
             <Typography variant="body1" align="center" gutterBottom>
               {user.email}
             </Typography>
+
+            {/* Buttons for editing user information */}
+            <Button variant="outlined" fullWidth>
+              Edit Name
+            </Button>
+            <Button variant="outlined" fullWidth>
+              Change Profile Photo
+            </Button>
+            <Button variant="outlined" fullWidth>
+              Change Email
+            </Button>
+            <Button variant="outlined" fullWidth>
+              Change Password
+            </Button>
+
+
           </Grid>
           {/* Right column for reviews */}
           <Grid item xs={12} md={8}>
