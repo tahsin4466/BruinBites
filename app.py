@@ -5,12 +5,22 @@ import os
 from random import randint
 from datetime import date
 import re
+import boto3
+import uuid
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 secret = os.urandom(12)
 app.config['SECRET_KEY'] = secret
 
 CORS(app)
+
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id='AKIA6ODU6BOOZSQAK4WE',
+    aws_secret_access_key='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',
+    region_name='us-east-2'
+)
+BUCKET_NAME = 'bruinbitescdn'
 
 def dbConnect():
     return pymysql.connect(
@@ -215,7 +225,7 @@ def get_userImage():
         try:
             with db_connection.cursor() as cursor:
                 sql = "SELECT User_PFP FROM BB_User WHERE User_ID = %s"
-                cursor.execute(sql, (session['id'],))
+                cursor.execute(sql, (session.get('id'),))
                 info = cursor.fetchone()
                 print(info)
                 userPFP = {
@@ -331,6 +341,68 @@ def signup():
                     message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
         finally:
             db_connection.close()
+    return message
+
+@app.route('/api/checkReviewStatus', methods=['GET'])
+def checkReviewStatus():
+    print("checking review status")
+    diningID = 2
+    userID = session.get('id')
+    db_connection = dbConnect()
+    dateToday = date.today()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT (Review_Date) FROM BB_Review WHERE User_ID = %s AND BB_DiningID = %s;"
+            cursor.execute(sql, (userID, diningID,))
+            row = cursor.fetchone()
+            if len(row) != 0 and row[0] == dateToday:
+                print("User submitted a review today!")
+                message = jsonify({"hasSubmitted": True}), 200
+            else:
+                print("User has not reviewed today")
+                message = jsonify({"hasSubmitted": False}), 200
+    finally:
+        db_connection.close()
+    return message
+@app.route('/api/reviewUpload', methods=['POST'])
+def upload_review():
+    files = request.files.getlist('images')
+    imageUrls = []
+
+    title = request.form.get('title')
+    content = request.form.get('content')
+    rating = request.form.get('rating')
+    restaurantID = 2
+    userID = session.get('id')
+    dateToday = date.today()
+    message = jsonify({'message': 'Review submission failed', 'status': 'failure'}), 400
+
+    # Upload images to S3 and get their URLs
+    for file in files:
+        file_name = f'reviews/{uuid.uuid4()}-{file.filename}'
+        s3_client.upload_fileobj(
+            file,
+            BUCKET_NAME,
+            file_name,
+        )
+        imageUrl = f'https://{BUCKET_NAME}.s3.amazonaws.com/{file_name}'
+        imageUrls.append(imageUrl)
+
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "INSERT INTO BB_Review (BB_DiningID, User_ID, Review_Title, Review_Comment, Review_Rating, Review_Date) VALUES (%s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, (restaurantID, userID, title, content, rating, dateToday))
+            db_connection.commit()
+            reviewID = cursor.lastrowid
+            sql = "INSERT INTO BB_Images (Review_ID, Image_URL) VALUES (%s, %s)"
+            for imageUrl in imageUrls:
+                cursor.execute(sql, (reviewID, imageUrl))
+            db_connection.commit()
+            message = jsonify({'message': 'Review submission succeeded', 'status': 'success'}), 200
+    finally:
+        db_connection.close()
+
     return message
 
 @app.route('/api/logout', methods=['POST'])

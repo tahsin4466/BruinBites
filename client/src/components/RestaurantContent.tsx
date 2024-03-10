@@ -8,6 +8,8 @@ import CreateIcon from '@mui/icons-material/Create';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline';
+import axios from 'axios';
 
 interface RestaurantInfo {
   name: string;
@@ -66,13 +68,31 @@ const CombinedContent: React.FC = () => {
   const [selectedSubMenuIndex, setSelectedSubMenuIndex] = useState(0);
   const [restaurantHours, setRestaurantHours] = useState<RestaurantHours>({});
   const [restaurantInfo, setRestaurantInfo] = useState<RestaurantInfo | null>(null);
+  const [reviewImageFiles, setReviewImageFiles] = useState<File[]>([]);
   const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
   const [openGallery, setOpenGallery] = useState(false);
-  const [review, setReview] = useState({ title: '', content: '', rating: 2 });
+  const [review, setReview] = useState({ title: '', content: '', rating: 0 });
   const [currentMeal, setCurrentMeal] = useState<string>('');
   const [restaurantStatus, setRestaurantStatus] = useState<string>('Closed');
   const [nextOpeningTime, setNextOpeningTime] = useState<string>('');
+  const [hasSubmittedReview, setHasSubmittedReview] = useState(false);
+
+
   // Async functions for fetching data
+
+    const fetchReviewStatus = async () => {
+    try {
+      const response = await axios.get('/api/checkReviewStatus');
+      setHasSubmittedReview(response.data.hasSubmitted); // Assuming the response contains a boolean indicating the status
+      console.log("Checked if the user has submitted a review")
+      console.log(hasSubmittedReview)
+      console.log(response.data.hasSubmitted)
+    } catch (error) {
+      console.error('Error fetching review submission status:', error);
+    }
+  };
+
+
   const fetchMenus = async () => {
     const response = await fetch('/api/menu');
     const data = await response.json();
@@ -102,14 +122,16 @@ const CombinedContent: React.FC = () => {
   };
 
   useEffect(() => {
+    // Inside your useEffect for fetching data
     // Fetch data only once on component mount
-    const fetchData = async () => {
+    const initialize = async () => {
+      await fetchReviewStatus();
       await fetchMenus();
       await fetchImages();
       await fetchHours();
       await fetchInfo();
     };
-    fetchData();
+    initialize();
   }, []); // Empty dependency array means this effect runs once on mount
 
   useEffect(() => {
@@ -170,16 +192,39 @@ const CombinedContent: React.FC = () => {
   };
 
   const handleReviewImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const newImageUrl = URL.createObjectURL(event.target.files[0]);
-      setReviewImageUrls([...reviewImageUrls, newImageUrl]);
-    }
+      if (event.target.files && event.target.files.length > 0) {
+          const file = event.target.files[0];
+          setReviewImageFiles(prevFiles => [...prevFiles, file]);
+      }
   };
 
-  const handleReviewSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    // Submission logic goes here
-  };
+ const handleReviewSubmit = async (event: React.FormEvent) => {
+  event.preventDefault();
+
+  const formData = new FormData();
+  formData.append('title', review.title);
+  formData.append('content', review.content);
+  formData.append('rating', review.rating.toString());
+  console.log('Review files:', reviewImageFiles);
+  reviewImageFiles.forEach((file) => {
+    formData.append('images', file); // Append the file objects
+  });
+  for (let entry of (formData as any).entries()) {
+    console.log(entry[0] + ', ' + entry[1]);
+  }
+  try {
+    const response = await axios.post('/api/reviewUpload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log('Review submitted successfully:', response.data);
+    fetchReviewStatus(); // Update the review submission status
+    // Handle the response here, possibly updating reviewImageUrls with the new URLs
+  } catch (error) {
+    console.error('Error submitting review:', error);
+  }
+};
 
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -331,6 +376,16 @@ const CombinedContent: React.FC = () => {
         <Box sx={{ mr: 2 }}>
           <CreateIcon color="primary" sx={{ fontSize: '5rem' }} />
         </Box>
+        {
+        hasSubmittedReview ? (
+          <Box sx={{ flex: 1 }}>
+            <Stack direction="column" alignItems="center" gap={1}>
+            <Typography variant="h4" gutterBottom><strong>Thanks for leaving a review!</strong></Typography>
+            <Typography variant="h5">Please come back tomorrow.</Typography>
+            <CheckCircleIcon color="success" sx={{ fontSize: 60, mt: 2 }} />
+            </Stack>
+          </Box>
+        ) : (
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'monospace' }}>
             Write a Review!
@@ -391,8 +446,8 @@ const CombinedContent: React.FC = () => {
             ))}
           </Grid>
         </Box>
+            )}
       </Box>
-
     </Box>
   );
 };
