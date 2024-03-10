@@ -261,17 +261,6 @@ function ResponsiveAppBar() {
             </Button>
           ))}
         </Box>
-        <Box sx={{ flexGrow: 0.5 }}>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Dining Search"
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </Search>
-        </Box>
         <Box sx={{ flexGrow: 0 }}>
           {userPFP?.loggedIn === "true" ? (
             <>

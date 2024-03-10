@@ -12,17 +12,6 @@ import { IconButton } from '@mui/material';
 const restaurants = [
   {
     image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 1',
-    review: 4.5,
-    description: '\n' +
-        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."' +
-        '\n' +
-        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."' +
-        '\n' +
-        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
     name: 'Restaurant 2',
     review: 3.8,
     description: 'Description of Restaurant 2',
@@ -64,8 +53,6 @@ function Search() {
   };
 
 
-
-
   return (
     <div style={{ height: '100vh', overflow: 'auto' }}>
       <Box style={{ position: 'fixed', width: '100%', zIndex: 1000 }}>
@@ -73,7 +60,7 @@ function Search() {
       </Box>
       <Box p={2} mt={12}> {/* Add mt={12} to create space below the fixed header */}
         <Typography variant="h4" align="center" mt={4} sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-          Search Restaurants!
+          Search Restaurants
         </Typography>
         {/* Search box */}
         <Box
@@ -86,7 +73,7 @@ function Search() {
           noValidate
           autoComplete="off"
         >
-          <TextField id="outlined-basic" label="Search..." variant="outlined" fullWidth />
+          <TextField id="outlined-basic" label="I want to eat at..." variant="outlined" fullWidth />
         </Box>
         {/* Results Box */}
         <Grid container spacing={2} justifyContent="center" mt={4}>
@@ -102,7 +89,7 @@ function Search() {
                   />
                   <div>
                     {/* Restaurant Name */}
-                    <Typography variant="h6">{restaurant.name}</Typography>
+                    <Typography sx={{ fontFamily: 'monospace', fontWeight: 'bold' }} variant="h5">{restaurant.name}</Typography>
                     {/* Display review as stars */}
                     <Box component="fieldset" borderColor="transparent">
                       <Rating
