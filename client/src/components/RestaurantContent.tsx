@@ -22,6 +22,11 @@ interface MealPeriod {
   end: string;
 }
 
+interface RestaurantInfo {
+  name: string;
+  description: string;
+}
+
 interface RestaurantHours {
   [key: string]: MealPeriod;
 }
@@ -38,6 +43,11 @@ interface SubMenu {
 interface Menu {
   name: string;
   subMenus: SubMenu[];
+}
+
+const restaurantInfo: RestaurantInfo = {
+  name: "Bruin Plate",
+  description: "Dining venue at UCLA emphasizing health-oriented dishes made with local & sustainable ingredients."
 }
 
 const isCurrentTimeWithin = (start: string, end: string): boolean => {

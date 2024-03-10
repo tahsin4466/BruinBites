@@ -146,7 +146,7 @@ function ResponsiveAppBar() {
       navigate('/');
     }
     else if (page === 'Dining') {
-      navigate('/restaurant')
+      navigate('/search')
     }
     else{
       navigate(`/${page.toLowerCase()}`); // Assuming the page routes follow the pattern '/<pagename>'
@@ -174,6 +174,26 @@ function ResponsiveAppBar() {
 };
 
   return (
+    <AppBar position="static">
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          <Logo></Logo>
+          <Typography
+            variant="h6"
+            noWrap
+            component="a"
+            sx={{
+              mr: 2,
+              display: { xs: 'none', md: 'flex' },
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              letterSpacing: '.3rem',
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            Bruin Bites
+          </Typography>
   <AppBar position="static">
     <Container maxWidth="xl">
       <Toolbar disableGutters>
