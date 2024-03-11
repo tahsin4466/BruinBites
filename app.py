@@ -246,12 +246,17 @@ def get_hours():
                 start_time, end_time = time_range.split()
                 times.append(start_time)
                 times.append(end_time)
-            restaurant_hours = {
-                "Breakfast": {"start": times[0], "end": times[1]},
-                "Lunch": {"start": times[2], "end": times[3]},
-                "Dinner": {"start": times[4], "end": times[5]},
-                "Extended": {"start": times[6], "end": times[7]},
-            }
+            restaurant_hours = {}
+            if times[0] != "0":
+                restaurant_hours["Breakfast"] = {"start": times[0], "end": times[1]}
+
+            restaurant_hours["Lunch"] = {"start": times[2], "end": times[3]}
+            restaurant_hours["Dinner"] = {"start": times[4], "end": times[5]}
+
+            print (times[6])
+            if times[6] != "0":
+                restaurant_hours["Extended Dinner"] = {"start": times[6], "end": times[7]}
+
     finally:
         db_connection.close()
     return jsonify(restaurant_hours)
