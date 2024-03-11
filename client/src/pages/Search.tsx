@@ -1,56 +1,43 @@
-import React, { useState } from 'react';
 import HeaderMenu from '../components/HeaderMenu';
 import { Box, Typography, TextField, Grid, Card, CardContent } from '@mui/material';
 import Rating from '@mui/material/Rating';
 import StarIcon from '@mui/icons-material/Star';
+import React, { useState, useEffect } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse'; // Import Collapse component
 import { IconButton } from '@mui/material';
 
-
-// Define an array of restaurant objects with image, name, review, and description properties
-const restaurants = [
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 2',
-    review: 3.8,
-    description: 'Description of Restaurant 2',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 3',
-    review: 4.2,
-    description: 'Description of Restaurant 3',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 4',
-    review: 4.0,
-    description: 'Description of Restaurant 4',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 5',
-    review: 4.7,
-    description: 'Description of Restaurant 5',
-  },
-
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant Rando',
-    review: 3.8,
-    description: 'Description of Restaurant Rando',
-  },
-];
-
-
+interface Restaurant {
+  image: string;
+  name: string;
+  review: number;
+  description: string;
+}
 
 function Search() {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [expanded, setExpanded] = useState(-1);
 
   const handleExpand = (index: number) => {
     setExpanded((prevExpanded) => (prevExpanded === index ? -1 : index));
   };
+
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await fetch('/api/restaurantResults'); // Replace with your Flask API endpoint
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setRestaurants(data); // Assuming the API returns an array of restaurant objects
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
 
 
   return (

@@ -362,6 +362,46 @@ def checkReviewStatus():
     finally:
         db_connection.close()
     return message
+
+@app.route('/api/restaurantResults', methods=['GET'])
+def restaurantResults():
+    results = []
+    jsonResults = []
+    dbConnection = dbConnect()
+    try:
+        with dbConnection.cursor() as cursor:
+            #Get dining name and description
+            sql = "SELECT BB_DiningID, Dining_Name, Dining_Description FROM BB_Dining"
+            cursor.execute(sql)
+            info = cursor.fetchall()
+            for result in info:
+                results.append([result[0], result[1], result[2]])
+
+            #Get star ratings for reiews
+            sql = "SELECT Review_Rating FROM BB_Review WHERE BB_DiningID = %s;"
+            i = 0
+            for entry in results:
+                cursor.execute(sql, (entry[0]))
+                ratings = list(cursor.fetchall()[0])
+                results[i].append(sum(ratings)/len(ratings))
+                i+=1
+
+            #Get Image
+            sql = "SELECT BB_DiningID, Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID WHERE BB_DiningID = %s"
+            i = 0
+            for entry in results:
+                cursor.execute(sql, (entry[0]))
+                results[i].append(cursor.fetchone()[1])
+                i+=1
+    finally:
+        dbConnection.close()
+
+    #Organize results into expected JSON structure
+    for result in results:
+        jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
+    print(jsonResults)
+    return jsonify(jsonResults)
+
 @app.route('/api/reviewUpload', methods=['POST'])
 def upload_review():
     files = request.files.getlist('images')
