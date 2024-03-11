@@ -27,7 +27,18 @@ const User: React.FC = () => {
   };
 
   const handleNameSubmit = () => {
-    // Implement logic to submit name change
+    console.log('handleNameSubmit called'); // Add this line
+    // Prepare data for API call
+    const userData = {
+      name: name,
+      email: email,
+      password: password,
+      photo: profilePhoto
+    };
+    const jsonData = JSON.stringify(userData);
+
+    // Now you can use jsonData in your API call
+    console.log(jsonData);
   };
 
   const handleProfilePhotoSubmit = () => {
