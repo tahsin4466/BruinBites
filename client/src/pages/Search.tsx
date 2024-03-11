@@ -3,9 +3,7 @@ import { Box, Typography, TextField, Grid, Card, CardContent } from '@mui/materi
 import Rating from '@mui/material/Rating';
 import StarIcon from '@mui/icons-material/Star';
 import React, { useState, useEffect } from 'react';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Collapse from '@mui/material/Collapse'; // Import Collapse component
-import { IconButton } from '@mui/material';
+import Fuse from 'fuse.js';
 
 interface Restaurant {
   image: string;
@@ -16,11 +14,8 @@ interface Restaurant {
 
 function Search() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [expanded, setExpanded] = useState(-1);
-
-  const handleExpand = (index: number) => {
-    setExpanded((prevExpanded) => (prevExpanded === index ? -1 : index));
-  };
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -38,6 +33,19 @@ function Search() {
 
     fetchRestaurants();
   }, []);
+
+  useEffect(() => {
+    const options = {
+      keys: ['name', 'description'],
+    };
+
+    const fuse = new Fuse(restaurants, options);
+    const results = searchTerm ? fuse.search(searchTerm) : restaurants.map(restaurant => ({ item: restaurant }));
+    // @ts-ignore
+    const isFuseResult = (result: any): result is Fuse.FuseResult<Restaurant> => result.item !== undefined;
+    const matches = results.map(result => isFuseResult(result) ? result.item : result);
+    setFilteredRestaurants(matches);
+  }, [searchTerm, restaurants]); // Depend on searchTerm and restaurants
 
 
   return (
@@ -60,11 +68,18 @@ function Search() {
           noValidate
           autoComplete="off"
         >
-          <TextField id="outlined-basic" label="I want to eat at..." variant="outlined" fullWidth />
+           <TextField
+          id="outlined-basic"
+          label="I want to eat at..."
+          variant="outlined"
+          fullWidth
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)} // Set search term on input change
+        />
         </Box>
         {/* Results Box */}
         <Grid container spacing={2} justifyContent="center" mt={4}>
-          {restaurants.map((restaurant, index) => (
+          {filteredRestaurants.map((restaurant, index) => (
             <Grid item key={index} xs={12} md={5.5} lg={5.5}>
               <Card>
                 <CardContent style={{ display: 'flex', alignItems: 'center' }}>
