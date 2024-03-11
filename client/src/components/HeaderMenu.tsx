@@ -146,7 +146,7 @@ function ResponsiveAppBar() {
       navigate('/');
     }
     else if (page === 'Dining') {
-      navigate('/restaurant')
+      navigate('/search')
     }
     else{
       navigate(`/${page.toLowerCase()}`); // Assuming the page routes follow the pattern '/<pagename>'
@@ -260,17 +260,6 @@ function ResponsiveAppBar() {
               {page}
             </Button>
           ))}
-        </Box>
-        <Box sx={{ flexGrow: 0.5 }}>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Dining Search"
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </Search>
         </Box>
         <Box sx={{ flexGrow: 0 }}>
           {userPFP?.loggedIn === "true" ? (

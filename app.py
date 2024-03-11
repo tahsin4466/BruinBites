@@ -54,7 +54,6 @@ restaurantImages = [
     "https://i.insider.com/59f2479ccfad392f0d755979?width=600&format=jpeg&auto=webp",
 ]
 
-'''
 reviewData2 = [
     {
         "title": "Delicious and Affordable",
@@ -137,7 +136,7 @@ restaurant_hours2 = {
     "Dinner": {"start": "18:00", "end": "20:00"},
     "Extended": {"start": "21:00", "end": "24:00"},
 }
-'''
+
 
 @app.route('/api/userImage', methods=['GET'])
 def get_userImage():
@@ -246,6 +245,7 @@ def get_hours():
                 start_time, end_time = time_range.split()
                 times.append(start_time)
                 times.append(end_time)
+
             restaurant_hours = {}
             if times[0] != "0":
                 restaurant_hours["Breakfast"] = {"start": times[0], "end": times[1]}
@@ -339,6 +339,7 @@ def signup():
       message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
     elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
       message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+
     #Regex pattern for strong password
     elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
       message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
@@ -446,6 +447,10 @@ def restaurantPage():
 
 @app.route('/login')
 def loginPage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/search')
+def searchPage():
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
