@@ -3,6 +3,7 @@ import React from 'react';
 import { Container, Grid } from '@mui/material';
 import ReviewBox, { Review } from './ReviewBox';
 
+
 const reviews: Review[] = [
   {
     title: "Delicious and Affordable",
@@ -14,6 +15,7 @@ const reviews: Review[] = [
     userProfilePhoto: "https://example.com/user1.jpg",
     userName: "Alex Johnson",
     content: "I was pleasantly surprised by the quality of food offered at the campus dining hall. Great variety and everything tastes fresh. Definitely worth checking out!",
+    date: "2024-10-10"
   },
   {
     title: "Good for a Quick Bite",
@@ -27,6 +29,7 @@ const reviews: Review[] = [
     userProfilePhoto: "https://example.com/user2.jpg",
     userName: "Bethany Miles",
     content: "It's my go-to place when I need something quick and tasty between classes. The snacks section is my favorite.",
+    date: "2024-10-10"
   },
   {
     title: "Average Experience",
@@ -34,6 +37,7 @@ const reviews: Review[] = [
     userProfilePhoto: "https://example.com/user3.jpg",
     userName: "Charlie Smith",
     content: "It's okay if you're in a hurry, but don't expect too much. It gets the job done, though.",
+    date: "2024-10-10"
   },
   {
     title: "Not Great",
@@ -41,6 +45,7 @@ const reviews: Review[] = [
     userProfilePhoto: "https://example.com/user4.jpg",
     userName: "Dana Lee",
     content: "", // Little to no review content
+    date: "2024-10-10"
   },
   {
     title: "Disappointed",
@@ -48,6 +53,7 @@ const reviews: Review[] = [
     userProfilePhoto: "https://example.com/user5.jpg",
     userName: "Evan Wright",
     content: "The worst dining experience I've had on campus. I found a hair in my food, and the staff seemed indifferent when I complained. Will not be returning anytime soon.",
+    date: "2024-10-10"
   },
   {
     title: "Excellent Variety",
@@ -60,6 +66,7 @@ const reviews: Review[] = [
     userProfilePhoto: "https://example.com/user6.jpg",
     userName: "Fiona Graham",
     content: "The campus dining hall has a fantastic variety of foods to choose from. Whether you're vegan, vegetarian, or a meat-lover, there's something for everyone. Highly recommend the vegan options!",
+    date: "2024-10-10"
   },
   {
     title: "Great for Vegetarians",
@@ -69,6 +76,7 @@ const reviews: Review[] = [
     userProfilePhoto: "https://example.com/user7.jpg",
     userName: "George Huang",
     content: "As a vegetarian, it's often hard to find good options on campus. However, the dining hall has a great selection that doesn't disappoint. The veggie burgers are a must-try!",
+    date: "2024-10-10"
   }
 ];
 

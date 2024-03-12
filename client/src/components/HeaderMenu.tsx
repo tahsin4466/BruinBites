@@ -148,6 +148,9 @@ function ResponsiveAppBar() {
     else if (page === 'Dining') {
       navigate('/search')
     }
+    else if (page == 'My Profile') {
+      navigate('/profile')
+    }
     else{
       navigate(`/${page.toLowerCase()}`); // Assuming the page routes follow the pattern '/<pagename>'
     }
