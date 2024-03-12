@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import HeaderMenu from '../components/HeaderMenu';
-import ReviewsList from '../components/ReviewList'; // Import the ReviewsList component
+import ReviewsListUser from '../components/ReviewListUser'; // Import the ReviewsListUser component
 import { Container, Grid, Avatar, Typography, Button, TextField } from '@mui/material';
 
 const User: React.FC = () => {
@@ -145,7 +145,7 @@ const User: React.FC = () => {
           </Grid>
           {/* Right column for reviews */}
           <Grid item xs={12} md={8}>
-            <ReviewsList />
+            <ReviewsListUser />
           </Grid>
         </Grid>
       </Container>
