@@ -7,6 +7,7 @@ from datetime import date
 import re
 import boto3
 import uuid
+import bcrypt
 from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
@@ -220,25 +221,26 @@ def getRestaurantImages(restaurantName):
 def login():
     data = request.get_json()
     email = data.get('email')
-    password = data.get('password')
+    password = data.get('password').encode('utf-8')  # Encode password to bytes
+
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
             sql = "SELECT Password, User_ID FROM `BB_User` WHERE Email = %s"
             cursor.execute(sql, (email,))
-            row = cursor.fetchall()
-            if len(row) == 0:
+            row = cursor.fetchone()  # Assuming email is unique, fetchone is more appropriate
+
+            if row is None:
                 message = jsonify({'message': 'User does not exist', 'status': 'failure'}), 404
-            elif len(row) > 1:
-                message = jsonify({'message': 'Database error, duplicate entry', 'status': 'failure'}), 400
-            elif row[0][0] != password:
+            elif not bcrypt.checkpw(password, row[0].encode('utf-8')):  # Check the hashed password
                 message = jsonify({'message': 'Incorrect password', 'status': 'failure'}), 401
             else:
-                session['id'] = row[0][1]
+                session['id'] = row[1]
                 message = jsonify({'message': 'Login successful', 'status': 'success'}), 202
     finally:
         db_connection.close()
     return message
+
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -246,37 +248,26 @@ def signup():
     firstName = data.get('firstName')
     lastName = data.get('lastName')
     email = data.get('email')
-    password = data.get('password')
+    password = data.get('password').encode('utf-8')  # Encode password to bytes
     ID = randint(10000000, 99999999)
     dateToday = date.today()
-    #Regex pattern for valid email
-    if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
-      message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
-    #Regex patterns for valid First and Last names
-    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
-      message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
-    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
-      message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
 
-    #Regex pattern for strong password
-    elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
-      message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
-    else:
-      db_connection = dbConnect()
-      try:
-          with db_connection.cursor() as cursor:
-              sql = "SELECT * FROM `BB_User` WHERE Email = %s"
-              cursor.execute(sql, (email))
-              row = cursor.fetchall()
-              if len(row) > 0:
-                  message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
-              else:
-                sql = "INSERT INTO BB_User (User_ID, First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
-                cursor.execute(sql, (ID, firstName, lastName, email, dateToday, password,))
-                db_connection.commit()
-                message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
-      finally:
-            db_connection.close()
+    # Validation checks...
+    # After all checks pass:
+
+    hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())  # Hash the password
+
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            # Check if email already exists...
+            # If not, insert the new user with the hashed password:
+            sql = "INSERT INTO BB_User (User_ID, First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
+            cursor.execute(sql, (ID, firstName, lastName, email, dateToday, hashed_password))
+            db_connection.commit()
+            message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
+    finally:
+        db_connection.close()
     return message
 
 @app.route('/api/checkReviewStatus/<restaurantName>', methods=['GET'])
@@ -421,4 +412,4 @@ def searchPage():
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=3000, debug=True)
