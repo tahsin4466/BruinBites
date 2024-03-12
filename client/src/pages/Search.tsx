@@ -4,6 +4,7 @@ import Rating from '@mui/material/Rating';
 import StarIcon from '@mui/icons-material/Star';
 import React, { useState, useEffect } from 'react';
 import Fuse from 'fuse.js';
+import {useNavigate} from "react-router-dom";
 
 interface Restaurant {
   image: string;
@@ -16,6 +17,7 @@ function Search() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
+  const navigate = useNavigate(); //to the top
 
   useEffect(() => {
     const fetchRestaurants = async () => {
@@ -81,7 +83,7 @@ function Search() {
         <Grid container spacing={2} justifyContent="center" mt={4}>
           {filteredRestaurants.map((restaurant, index) => (
             <Grid item key={index} xs={12} md={5.5} lg={5.5}>
-              <Card>
+              <Card onClick={() => navigate(`/restaurant/${restaurant.name}`)} style={{ cursor: 'pointer' }}>
                 <CardContent style={{ display: 'flex', alignItems: 'center' }}>
                   {/* Restaurant image */}
                   <img
@@ -106,7 +108,6 @@ function Search() {
                     <Typography variant="body2">{restaurant.description}</Typography>
                   </div>
                 </CardContent>
-
               </Card>
             </Grid>
           ))}
