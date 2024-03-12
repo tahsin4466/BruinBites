@@ -416,6 +416,10 @@ def homePage():
 def restaurantPage():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/restaurant/<restaurantName>')
+def restaurantPageSpecific(restaurantName):
+    return send_from_directory(app.static_folder, 'index.html')
+
 @app.route('/login')
 def loginPage():
     return send_from_directory(app.static_folder, 'index.html')
