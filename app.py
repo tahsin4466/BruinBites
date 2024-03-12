@@ -53,6 +53,11 @@ def getRestaurantID(name):
         db_connection.close()
     return id
 
+userInfo = {
+    "name": "Jane Doe",
+    "email": "janedoe@example.com"
+}
+
 @app.route('/api/userImage', methods=['GET'])
 def get_userImage():
     if 'id' in session:
@@ -347,6 +352,33 @@ def restaurantResults():
         jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
     return jsonify(jsonResults)
 
+@app.route('/api/personalInfo', methods=['GET'])
+def getPersonalInfo():
+    userId = session.get('id')
+    return jsonify(userInfo)
+
+@app.route('/api/updateProfile', methods=['POST'])
+def updateProfile():
+    data = request.get_json()
+    userID = session.get('id')
+    newFirstName = data.get('firstName')
+    newLastName = data.get('lastName')
+    newEmail = data.get('email')
+    passwordUpdated = data.get('updatedPassword')
+    imageUpdated = data.get('updatedImage')
+    print(userID)
+    print(newFirstName)
+    print(newLastName)
+    print(newEmail)
+    print(passwordUpdated)
+    print(imageUpdated)
+    if passwordUpdated:
+        updatedPassword = data.get('password')
+        print(updatedPassword)
+    #put file handling stuff here
+
+    return jsonify({'message': 'Update succeeded', 'status': 'success'}), 200
+
 @app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
 def uploadReview(restaurantName):
     print("Uploading review...")
@@ -354,17 +386,11 @@ def uploadReview(restaurantName):
     imageUrls = []
 
     title = request.form.get('title')
-    print(title)
     content = request.form.get('content')
-    print(content)
     rating = request.form.get('rating')
-    print(rating)
     restaurantID = getRestaurantID(restaurantName)
-    print(restaurantID)
     userID = session.get('id')
-    print(userID)
     dateToday = date.today()
-    print(dateToday)
     message = jsonify({'message': 'Review submission failed', 'status': 'failure'}), 400
 
     # Upload images to S3 and get their URLs
