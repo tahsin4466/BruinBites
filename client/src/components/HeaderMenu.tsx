@@ -78,8 +78,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const pages = ['Home', 'Dining', 'Leaderboard'];
-const settings = ['Profile', 'Logout'];
+const pages = ['Home', 'Dining', 'My Profile'];
+const settings = ['Settings', 'Logout'];
 
 function Logo() {
     let selector = Math.floor(Math.random() * 8);
@@ -248,7 +248,7 @@ function ResponsiveAppBar() {
             textDecoration: 'none',
           }}
         >
-          BB
+          Bruin Bites
         </Typography>
         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
           {pages.map((page) => (
@@ -260,17 +260,6 @@ function ResponsiveAppBar() {
               {page}
             </Button>
           ))}
-        </Box>
-        <Box sx={{ flexGrow: 0.5 }}>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Dining Search"
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </Search>
         </Box>
         <Box sx={{ flexGrow: 0 }}>
           {userPFP?.loggedIn === "true" ? (

@@ -87,7 +87,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<Home />} />
           <Route path="/leaderboard" element={<ProtectedRoute element={<Leaderboard />} />} />
-          <Route path="/restaurant" element={<ProtectedRoute element={<Restaurant />} />} />
+          <Route path="/restaurant/:name" element={<ProtectedRoute element={<Restaurant />} />} />
           <Route path="/profile" element={<ProtectedRoute element={<User />} />} />
           <Route path="/search" element={<ProtectedRoute element={<Search />} />} />
           {/* Define more routes as needed */}

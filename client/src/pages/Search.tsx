@@ -1,69 +1,53 @@
-import React, { useState } from 'react';
 import HeaderMenu from '../components/HeaderMenu';
 import { Box, Typography, TextField, Grid, Card, CardContent } from '@mui/material';
 import Rating from '@mui/material/Rating';
 import StarIcon from '@mui/icons-material/Star';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Collapse from '@mui/material/Collapse'; // Import Collapse component
-import { IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import Fuse from 'fuse.js';
+import {useNavigate} from "react-router-dom";
 
-
-// Define an array of restaurant objects with image, name, review, and description properties
-const restaurants = [
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 1',
-    review: 4.5,
-    description: '\n' +
-        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."' +
-        '\n' +
-        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."' +
-        '\n' +
-        '"The new restaurant in town offers a delightful culinary experience with exceptional service and ambiance."',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 2',
-    review: 3.8,
-    description: 'Description of Restaurant 2',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 3',
-    review: 4.2,
-    description: 'Description of Restaurant 3',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 4',
-    review: 4.0,
-    description: 'Description of Restaurant 4',
-  },
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant 5',
-    review: 4.7,
-    description: 'Description of Restaurant 5',
-  },
-
-  {
-    image: 'https://source.unsplash.com/random', // random
-    name: 'Restaurant Rando',
-    review: 3.8,
-    description: 'Description of Restaurant Rando',
-  },
-];
-
-
+interface Restaurant {
+  image: string;
+  name: string;
+  review: number;
+  description: string;
+}
 
 function Search() {
-  const [expanded, setExpanded] = useState(-1);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredRestaurants, setFilteredRestaurants] = useState<Restaurant[]>([]);
+  const navigate = useNavigate(); //to the top
 
-  const handleExpand = (index: number) => {
-    setExpanded((prevExpanded) => (prevExpanded === index ? -1 : index));
-  };
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await fetch('/api/restaurantResults'); // Replace with your Flask API endpoint
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setRestaurants(data); // Assuming the API returns an array of restaurant objects
+      } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+      }
+    };
 
+    fetchRestaurants();
+  }, []);
 
+  useEffect(() => {
+    const options = {
+      keys: ['name', 'description'],
+    };
+
+    const fuse = new Fuse(restaurants, options);
+    const results = searchTerm ? fuse.search(searchTerm) : restaurants.map(restaurant => ({ item: restaurant }));
+    // @ts-ignore
+    const isFuseResult = (result: any): result is Fuse.FuseResult<Restaurant> => result.item !== undefined;
+    const matches = results.map(result => isFuseResult(result) ? result.item : result);
+    setFilteredRestaurants(matches);
+  }, [searchTerm, restaurants]); // Depend on searchTerm and restaurants
 
 
   return (
@@ -73,7 +57,7 @@ function Search() {
       </Box>
       <Box p={2} mt={12}> {/* Add mt={12} to create space below the fixed header */}
         <Typography variant="h4" align="center" mt={4} sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-          Search Restaurants!
+          Search Restaurants
         </Typography>
         {/* Search box */}
         <Box
@@ -86,13 +70,20 @@ function Search() {
           noValidate
           autoComplete="off"
         >
-          <TextField id="outlined-basic" label="Search..." variant="outlined" fullWidth />
+           <TextField
+          id="outlined-basic"
+          label="I want to eat at..."
+          variant="outlined"
+          fullWidth
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)} // Set search term on input change
+        />
         </Box>
         {/* Results Box */}
         <Grid container spacing={2} justifyContent="center" mt={4}>
-          {restaurants.map((restaurant, index) => (
+          {filteredRestaurants.map((restaurant, index) => (
             <Grid item key={index} xs={12} md={5.5} lg={5.5}>
-              <Card>
+              <Card onClick={() => navigate(`/restaurant/${restaurant.name}`)} style={{ cursor: 'pointer' }}>
                 <CardContent style={{ display: 'flex', alignItems: 'center' }}>
                   {/* Restaurant image */}
                   <img
@@ -102,7 +93,7 @@ function Search() {
                   />
                   <div>
                     {/* Restaurant Name */}
-                    <Typography variant="h6">{restaurant.name}</Typography>
+                    <Typography sx={{ fontFamily: 'monospace', fontWeight: 'bold' }} variant="h5">{restaurant.name}</Typography>
                     {/* Display review as stars */}
                     <Box component="fieldset" borderColor="transparent">
                       <Rating
@@ -117,7 +108,6 @@ function Search() {
                     <Typography variant="body2">{restaurant.description}</Typography>
                   </div>
                 </CardContent>
-
               </Card>
             </Grid>
           ))}

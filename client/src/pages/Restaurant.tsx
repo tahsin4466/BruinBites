@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Box, SwipeableDrawer, Typography, Fab, Grid, Paper, useTheme, useMediaQuery, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close'; // Importing Close icon
@@ -45,6 +46,7 @@ const FloatingMenuButton = styled(Fab)(({ theme }) => ({
 }));
 
 const Restaurant = () => {
+  const { name } = useParams(); // This gets the ID from the route
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -59,13 +61,13 @@ const Restaurant = () => {
       <Grid container spacing={0}> {/* Set spacing to 0 to remove padding between columns */}
         <Grid item xs={12} md={8}>
           <MainContent>
-            <RestaurantContent/>
+            <RestaurantContent name={name}/>
           </MainContent>
         </Grid>
         <Grid item md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
           <ReviewsContent>
             <TitleTypography variant="h4">Reviews</TitleTypography>
-            <ReviewList />
+            <ReviewList name={name}/>
           </ReviewsContent>
         </Grid>
       </Grid>
@@ -82,7 +84,7 @@ const Restaurant = () => {
           <TitleTypography variant="h5" style={{ paddingTop: '32px' }}> {/* Add padding to account for the close button */}
             Reviews
           </TitleTypography>
-          <ReviewList />
+          <ReviewList name={name}/>
         </DrawerContent>
       </SwipeableDrawer>
     </>
