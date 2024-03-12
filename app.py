@@ -245,13 +245,18 @@ def get_hours():
                 start_time, end_time = time_range.split()
                 times.append(start_time)
                 times.append(end_time)
-            print(times[6], times[7])
-            restaurant_hours = {
-                "Breakfast": {"start": times[0], "end": times[1]},
-                "Lunch": {"start": times[2], "end": times[3]},
-                "Dinner": {"start": times[4], "end": times[5]},
-                "Extended": {"start": times[6], "end": times[7]},
-            }
+
+            restaurant_hours = {}
+            if times[0] != "0":
+                restaurant_hours["Breakfast"] = {"start": times[0], "end": times[1]}
+
+            restaurant_hours["Lunch"] = {"start": times[2], "end": times[3]}
+            restaurant_hours["Dinner"] = {"start": times[4], "end": times[5]}
+
+            print (times[6])
+            if times[6] != "0":
+                restaurant_hours["Extended Dinner"] = {"start": times[6], "end": times[7]}
+
     finally:
         db_connection.close()
     return jsonify(restaurant_hours)
@@ -263,16 +268,25 @@ def get_reviews():
     try:
         with db_connection.cursor() as cursor:
             sql = (
-                "SELECT r.Review_Title, r.Review_Rating, r.Review_Picture, u.User_PFP, u.First_Name, r.Review_Comment FROM BB_Review r "
+                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID FROM BB_Review r "
                 "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s")
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchall()
+
             reviewData = []
             for row in info:
-                photos = row[2].split()
+                reviewID = row[5]
+                sql2 = ("SELECT Image_URL FROM `BB_Images` WHERE Review_ID = %s")
+                cursor.execute(sql2, (reviewID,))
+                info2 = cursor.fetchall()
+                print(info2)
+
+                photos = []
+                for image in info2:
+                    photos.append(image)
                 reviewData.append(
-                    {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[3],
-                     "userName": row[4], "content": row[5]})
+                    {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
+                     "userName": row[3], "content": row[4]})
     finally:
         db_connection.close()
     return jsonify(reviewData)
@@ -320,6 +334,12 @@ def signup():
     #Regex pattern for valid email
     if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
       message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
+    #Regex patterns for valid First and Last names
+    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
+      message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
+      message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+
     #Regex pattern for strong password
     elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
       message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
