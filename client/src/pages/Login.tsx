@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Container from '@mui/material/Container';
 import { Snackbar, Alert } from '@mui/material';
-
 import CombinedLogin from '../components/LoginSheet';
 import SignUp from '../components/SignupSheet';
 
@@ -48,7 +47,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/restaurant');
+      navigate('/');
     }
   }, [isAuthenticated, navigate]);
 

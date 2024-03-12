@@ -257,7 +257,6 @@ def signup():
       message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
     elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
       message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
-
     #Regex pattern for strong password
     elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
       message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
@@ -348,7 +347,6 @@ def uploadReview(restaurantName):
     print("Uploading review...")
     files = request.files.getlist('images')
     imageUrls = []
-
     title = request.form.get('title')
     print(title)
     content = request.form.get('content')
@@ -408,8 +406,12 @@ def check_session():
 def homePage():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/restaurant/<restaurantName>')
+def restaurantPageSpecific(restaurantName):
+    return send_from_directory(app.static_folder, 'index.html')
+
 @app.route('/restaurant')
-def restaurantPage():
+def restaurantPageBase():
     return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/login')
@@ -418,6 +420,14 @@ def loginPage():
 
 @app.route('/search')
 def searchPage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/user/<userID>')
+def userPageThirdPerson(userID):
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/user')
+def userPageFirstPerson():
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
