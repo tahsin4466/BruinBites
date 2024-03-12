@@ -126,7 +126,7 @@ const User: React.FC = () => {
           </Grid>
           {/* Right column for reviews */}
           <Grid item xs={12} md={8}>
-            <ReviewsList />
+            {/*<ReviewsList />*/}
           </Grid>
         </Grid>
       </Container>

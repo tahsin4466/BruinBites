@@ -11,6 +11,9 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CheckCircleIcon from '@mui/icons-material/CheckCircleOutline';
 import axios from 'axios';
 
+interface RestaurantContentProps {
+  name: string | undefined;
+}
 
 interface RestaurantInfo {
   name: string;
@@ -72,7 +75,7 @@ const findNextMealPeriod = (sortedMeals: [string, MealPeriod][]): { nextMeal: st
   return { nextMeal: sortedMeals[0][0], startTime: sortedMeals[0][1].start };
 };
 
-const CombinedContent: React.FC = () => {
+const CombinedContent: React.FC<RestaurantContentProps> = ({ name }) => {
   const [restaurantImageUrls, setRestaurantImageUrls] = useState<string[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
   const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
@@ -93,7 +96,7 @@ const CombinedContent: React.FC = () => {
 
     const fetchReviewStatus = async () => {
     try {
-      const response = await axios.get('/api/checkReviewStatus');
+      const response = await axios.get(`/api/checkReviewStatus/${name}`);
       setHasSubmittedReview(response.data.hasSubmitted); // Assuming the response contains a boolean indicating the status
       console.log("Checked if the user has submitted a review")
       console.log(hasSubmittedReview)
@@ -105,7 +108,7 @@ const CombinedContent: React.FC = () => {
 
 
   const fetchMenus = async () => {
-    const response = await fetch('/api/menu');
+    const response = await fetch(`/api/menu/${name}`);
     const data = await response.json();
     console.log(data); // Log the fetched menu data
     setMenus(data.menus); // Make sure to access the `menus` property
@@ -115,19 +118,19 @@ const CombinedContent: React.FC = () => {
   };
 
   const fetchImages = async () => {
-    const response = await fetch('/api/restaurantImages');
+    const response = await fetch(`/api/restaurantImages/${name}`);
     const data = await response.json();
     setRestaurantImageUrls(data);
   };
 
   const fetchHours = async () => {
-    const response = await fetch('/api/hours');
+    const response = await fetch(`/api/hours/${name}`);
     const data = await response.json();
     setRestaurantHours(data);
   };
 
   const fetchInfo = async() => {
-    const response = await fetch('/api/restaurantInfo');
+    const response = await fetch(`/api/restaurantInfo/${name}`);
     const data = await response.json();
     setRestaurantInfo(data); // Assuming data is an object
   };

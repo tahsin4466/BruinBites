@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Container, Grid } from '@mui/material';
 import ReviewBox, { Review } from './ReviewBox';
 
-const ReviewsList: React.FC = () => {
+interface ReviewListProps {
+  name: string | undefined;
+}
+
+const ReviewsList: React.FC<ReviewListProps> = ({ name }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {

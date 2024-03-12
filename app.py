@@ -41,6 +41,24 @@ def dbConnect():
         db="BruinBites"
     )
 
+def getRestaurantID(name):
+    print("Called the restaurant ID getter")
+    print("Here is the name:")
+    print(name)
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            print("Here is the sql:")
+            sql = "SELECT BB_DiningID FROM BB_Dining WHERE Dining_Name = %s"
+            print(sql)
+            cursor.execute(sql, (name))
+            id = cursor.fetchone()
+            print("Here is the id result:")
+            print(id)
+    finally:
+        db_connection.close()
+    return id
+
 # Sample data
 restaurantImages = [
     "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
@@ -166,9 +184,9 @@ def get_userImage():
     print(userPFP)
     return jsonify(userPFP)
 
-@app.route('/api/restaurantInfo', methods=['GET'])
-def get_restaurantInfo():
-    restaurantID = 2
+@app.route('/api/restaurantInfo/<restaurantName>', methods=['GET'])
+def get_restaurantInfo(restaurantName):
+    restaurantID = getRestaurantID(restaurantName)
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
@@ -183,9 +201,9 @@ def get_restaurantInfo():
         db_connection.close()
     return jsonify(restaurantInfo)
 
-@app.route('/api/menu', methods=['GET'])
-def get_menu():
-    restaurantID = 2
+@app.route('/api/menu/<restaurantName>', methods=['GET'])
+def get_menu(restaurantName):
+    restaurantID = getRestaurantID(restaurantName)
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
@@ -231,9 +249,9 @@ def get_menu():
         db_connection.close()
     return jsonify(menus)
 
-@app.route('/api/hours', methods=['GET'])
-def get_hours():
-    restaurantID = 1
+@app.route('/api/hours/<restaurantName>', methods=['GET'])
+def get_hours(restaurantName):
+    restaurantID = getRestaurantID(restaurantName)
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
@@ -291,8 +309,8 @@ def get_reviews():
         db_connection.close()
     return jsonify(reviewData)
 
-@app.route('/api/restaurantImages', methods=['GET'])
-def getRestaurantImages():
+@app.route('/api/restaurantImages/<restaurantName>', methods=['GET'])
+def getRestaurantImages(restaurantName):
     return jsonify(restaurantImages)
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -361,10 +379,9 @@ def signup():
             db_connection.close()
     return message
 
-@app.route('/api/checkReviewStatus', methods=['GET'])
-def checkReviewStatus():
-    print("checking review status")
-    diningID = 2
+@app.route('/api/checkReviewStatus/<restaurantName>', methods=['GET'])
+def checkReviewStatus(restaurantName):
+    diningID = getRestaurantID(restaurantName)
     userID = session.get('id')
     db_connection = dbConnect()
     dateToday = date.today()
@@ -382,6 +399,46 @@ def checkReviewStatus():
     finally:
         db_connection.close()
     return message
+
+@app.route('/api/restaurantResults', methods=['GET'])
+def restaurantResults():
+    results = []
+    jsonResults = []
+    dbConnection = dbConnect()
+    try:
+        with dbConnection.cursor() as cursor:
+            #Get dining name and description
+            sql = "SELECT BB_DiningID, Dining_Name, Dining_Description FROM BB_Dining"
+            cursor.execute(sql)
+            info = cursor.fetchall()
+            for result in info:
+                results.append([result[0], result[1], result[2]])
+
+            #Get star ratings for reiews
+            sql = "SELECT Review_Rating FROM BB_Review WHERE BB_DiningID = %s;"
+            i = 0
+            for entry in results:
+                cursor.execute(sql, (entry[0]))
+                ratings = list(cursor.fetchall()[0])
+                results[i].append(sum(ratings)/len(ratings))
+                i+=1
+
+            #Get Image
+            sql = "SELECT BB_DiningID, Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID WHERE BB_DiningID = %s"
+            i = 0
+            for entry in results:
+                cursor.execute(sql, (entry[0]))
+                results[i].append(cursor.fetchone()[1])
+                i+=1
+    finally:
+        dbConnection.close()
+
+    #Organize results into expected JSON structure
+    for result in results:
+        jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
+    print(jsonResults)
+    return jsonify(jsonResults)
+
 @app.route('/api/reviewUpload', methods=['POST'])
 def upload_review():
     files = request.files.getlist('images')
