@@ -85,7 +85,7 @@ const CombinedContent: React.FC<RestaurantContentProps> = ({ name }) => {
   const [reviewImageFiles, setReviewImageFiles] = useState<File[]>([]);
   const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
   const [openGallery, setOpenGallery] = useState(false);
-  const [review, setReview] = useState({ title: '', content: '', rating: 0 });
+  const [review, setReview] = useState({ title: '', content: '', rating: 5 });
   const [currentMeal, setCurrentMeal] = useState<string>('');
   const [restaurantStatus, setRestaurantStatus] = useState<string>('Closed');
   const [nextOpeningTime, setNextOpeningTime] = useState<string>('');
@@ -227,13 +227,13 @@ const CombinedContent: React.FC<RestaurantContentProps> = ({ name }) => {
     console.log(entry[0] + ', ' + entry[1]);
   }
   try {
-    const response = await axios.post('/api/reviewUpload', formData, {
+    const response = await axios.post(`/api/reviewUpload/${name}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
     console.log('Review submitted successfully:', response.data);
-    fetchReviewStatus(); // Update the review submission status
+    setHasSubmittedReview(true);
     // Handle the response here, possibly updating reviewImageUrls with the new URLs
   } catch (error) {
     console.error('Error submitting review:', error);

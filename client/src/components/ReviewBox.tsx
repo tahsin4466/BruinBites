@@ -13,6 +13,7 @@ export interface Review {
   userProfilePhoto: string;
   userName: string;
   content: string;
+  date: string;
 }
 
 const ImageGalleryModal: React.FC<{ images: string[]; open: boolean; onClose: () => void }> = ({
@@ -66,6 +67,9 @@ const ReviewBox: React.FC<{ review: Review }> = ({ review }) => {
             {review.title}
           </Typography>
         </Box>
+        <Typography variant="body2" sx={{ textAlign: 'left', mb: 2, color: '#666' }}>
+          <strong>{review.date}</strong>
+        </Typography>
         <Typography variant="body1" sx={{ textAlign: 'left', mb: 2, color: '#666' }}>
           {review.content}
         </Typography>

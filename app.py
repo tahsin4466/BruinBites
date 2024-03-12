@@ -47,7 +47,7 @@ def getRestaurantID(name):
         with db_connection.cursor() as cursor:
             sql = "SELECT BB_DiningID FROM BB_Dining WHERE Dining_Name = %s"
             cursor.execute(sql, (name))
-            id = cursor.fetchone()
+            id = cursor.fetchone()[0]
     finally:
         db_connection.close()
     return id
@@ -177,8 +177,8 @@ def get_reviews(restaurantName):
     try:
         with db_connection.cursor() as cursor:
             sql = (
-                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name FROM BB_Review r "
-                "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s")
+                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name, r.Review_Date FROM BB_Review r "
+                "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s ORDER BY r.Review_Date DESC")
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchall()
 
@@ -195,7 +195,7 @@ def get_reviews(restaurantName):
                 userName = row[3] + " " + row[6]
                 reviewData.append(
                     {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
-                     "userName": userName, "content": row[4]})
+                     "userName": userName, "content": row[4], "date": row[7].strftime("%d/%m/%Y")})
     finally:
         db_connection.close()
     return jsonify(reviewData)
@@ -207,7 +207,7 @@ def getRestaurantImages(restaurantName):
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
-            sql = "SELECT Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID = BB_Review.Review_ID WHERE BB_DiningID = %s"
+            sql = "SELECT Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID = BB_Review.Review_ID WHERE BB_DiningID = %s ORDER BY Review_Date DESC"
             cursor.execute(sql, (restaurantID))
             images = cursor.fetchall()
             for URL in images:
@@ -281,18 +281,24 @@ def signup():
 
 @app.route('/api/checkReviewStatus/<restaurantName>', methods=['GET'])
 def checkReviewStatus(restaurantName):
+    print("checking review status")
     diningID = getRestaurantID(restaurantName)
+    print(diningID)
     userID = session.get('id')
+    print(userID)
     db_connection = dbConnect()
     dateToday = date.today()
+    print(dateToday)
     try:
         with db_connection.cursor() as cursor:
-            sql = "SELECT (Review_Date) FROM BB_Review WHERE User_ID = %s AND BB_DiningID = %s;"
+            sql = "SELECT (Review_Date) FROM BB_Review WHERE User_ID = %s AND BB_DiningID = %s ORDER BY Review_Date DESC"
             cursor.execute(sql, (userID, diningID,))
             row = cursor.fetchone()
             if len(row) != 0 and row[0] == dateToday:
+                print("Has submitted a review today")
                 message = jsonify({"hasSubmitted": True}), 200
             else:
+                print("Has not submitted a review today")
                 message = jsonify({"hasSubmitted": False}), 200
     finally:
         db_connection.close()
@@ -323,7 +329,7 @@ def restaurantResults():
                 i+=1
 
             #Get Image
-            sql = "SELECT BB_DiningID, Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID WHERE BB_DiningID = %s"
+            sql = "SELECT BB_DiningID, Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID WHERE BB_DiningID = %s ORDER BY Review_Date DESC"
             i = 0
             for entry in results:
                 cursor.execute(sql, (entry[0]))
@@ -338,16 +344,23 @@ def restaurantResults():
     return jsonify(jsonResults)
 
 @app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
-def upload_review(restaurantName):
+def uploadReview(restaurantName):
+    print("Uploading review...")
     files = request.files.getlist('images')
     imageUrls = []
 
     title = request.form.get('title')
+    print(title)
     content = request.form.get('content')
+    print(content)
     rating = request.form.get('rating')
+    print(rating)
     restaurantID = getRestaurantID(restaurantName)
+    print(restaurantID)
     userID = session.get('id')
+    print(userID)
     dateToday = date.today()
+    print(dateToday)
     message = jsonify({'message': 'Review submission failed', 'status': 'failure'}), 400
 
     # Upload images to S3 and get their URLs
