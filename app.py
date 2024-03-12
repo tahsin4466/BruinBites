@@ -428,11 +428,11 @@ def loginPage():
 def searchPage():
     return send_from_directory(app.static_folder, 'index.html')
 
-@app.route('/user')
+@app.route('/profile')
 def userPage():
     return send_from_directory(app.static_folder, 'index.html')
 
-@app.route('/user/<userID>')
+@app.route('/profile/<userID>')
 def userViewPage(userID):
     return send_from_directory(app.static_folder, 'index.html')
 

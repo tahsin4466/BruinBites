@@ -170,7 +170,7 @@ function ResponsiveAppBar() {
         }
       })
       .catch(error => console.error('Error logging out:', error));
-  } else if (setting === 'Profile') {
+  } else if (setting === 'Settings') {
     console.log('to the profile!!');
     navigate('/profile'); // Invoke navigation to the profile page
   }
@@ -185,7 +185,6 @@ function ResponsiveAppBar() {
           variant="h6"
           noWrap
           component="a"
-          href="#app-bar-with-responsive-menu"
           sx={{
             mr: 2,
             display: { xs: 'none', md: 'flex' },
@@ -239,7 +238,6 @@ function ResponsiveAppBar() {
           variant="h5"
           noWrap
           component="a"
-          href="#app-bar-with-responsive-menu"
           sx={{
             mr: 2,
             display: { xs: 'flex', md: 'none' },

@@ -60,16 +60,17 @@ function Search() {
           Search Restaurants
         </Typography>
         {/* Search box */}
-        <Box
-          component="form"
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            '& > :not(style)': { m: 1, width: '65%' },
-          }}
-          noValidate
-          autoComplete="off"
-        >
+       <Box
+        component="form"
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          '& > :not(style)': { m: 1, width: '65%' },
+        }}
+        noValidate
+        autoComplete="off"
+        onSubmit={(e) => e.preventDefault()} // Prevent form submission on Enter
+      >
            <TextField
           id="outlined-basic"
           label="I want to eat at..."
