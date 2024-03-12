@@ -11,7 +11,7 @@ const ReviewsList: React.FC<ReviewListProps> = ({ name }) => {
 
   useEffect(() => {
     const fetchReviews = async () => {
-      const response = await fetch('/api/reviews');
+      const response = await fetch(`/api/reviews/${name}`);
       const data = await response.json();
       setReviews(data);
     };

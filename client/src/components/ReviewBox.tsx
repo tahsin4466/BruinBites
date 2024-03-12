@@ -32,17 +32,17 @@ const ImageGalleryModal: React.FC<{ images: string[]; open: boolean; onClose: ()
 
   return (
     <Modal open={open} onClose={onClose} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Box sx={{ position: 'relative', width: 'auto', height: 'auto', outline: 'none' }}>
-        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8, color: 'white', zIndex: 10 }}>
+      <Box sx={{ position: 'relative', width: 'auto', height: 'auto', outline: 'none', maxWidth: '90vw', maxHeight: '90vh', overflow: 'hidden', bgcolor: 'background.paper', borderRadius: 2 }}>
+        <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8, color: 'black', zIndex: 10 }}>
           <CloseIcon />
         </IconButton>
-        <IconButton onClick={handlePrev} sx={{ position: 'absolute', left: 16, top: '50%', color: 'white', zIndex: 10 }}>
+        <IconButton onClick={handlePrev} sx={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'black', zIndex: 10 }}>
           <ArrowBackIosNewIcon />
         </IconButton>
-        <IconButton onClick={handleNext} sx={{ position: 'absolute', right: 16, top: '50%', color: 'white', zIndex: 10 }}>
+        <IconButton onClick={handleNext} sx={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', color: 'black', zIndex: 10 }}>
           <ArrowForwardIosIcon />
         </IconButton>
-        <img src={images[currentIndex]} alt={`Review Image ${currentIndex}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        <img src={images[currentIndex]} alt={`Review Image ${currentIndex}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', margin: 'auto', display: 'block' }} />
       </Box>
     </Modal>
   );

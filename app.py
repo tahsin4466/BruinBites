@@ -10,7 +10,7 @@ import uuid
 from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
-secret = os.urandom(12)
+secret = os.urandom(24)
 app.config['SECRET_KEY'] = secret
 CORS(app)
 load_dotenv()
@@ -42,146 +42,38 @@ def dbConnect():
     )
 
 def getRestaurantID(name):
-    print("Called the restaurant ID getter")
-    print("Here is the name:")
-    print(name)
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
-            print("Here is the sql:")
             sql = "SELECT BB_DiningID FROM BB_Dining WHERE Dining_Name = %s"
-            print(sql)
             cursor.execute(sql, (name))
             id = cursor.fetchone()
-            print("Here is the id result:")
-            print(id)
     finally:
         db_connection.close()
     return id
 
-# Sample data
-restaurantImages = [
-    "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
-    "https://bruinplate.hh.ucla.edu/img/About_Facility1.jpg",
-    "https://bruinplate.hh.ucla.edu/img/Home_NewFreshSlide.jpg",
-    "https://i.insider.com/59f2479dcfad392f0d75597b?width=700",
-    "https://s3-media0.fl.yelpcdn.com/bphoto/AH1o0Xj5aS_5LR9yIsSXRg/348s.jpg",
-    "https://i.insider.com/59f2479dcfad392f0d75597d?width=800&format=jpeg&auto=webp",
-    "https://i.insider.com/59f2479dcfad392f0d75597e?width=800&format=jpeg&auto=webp",
-    "https://s3-media0.fl.yelpcdn.com/bphoto/8KxbxoUtL57Qp_C-SNg4tg/348s.jpg",
-    "https://i.insider.com/59f2479ccfad392f0d755979?width=600&format=jpeg&auto=webp",
-]
-
-reviewData2 = [
-    {
-        "title": "Delicious and Affordable",
-        "rating": 5,
-        "thumbnailUrls": [
-            "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
-            "https://bruinplate.hh.ucla.edu/img/About_Facility1.jpg",
-        ],
-        "userProfilePhoto": "https://example.com/user1.jpg",
-        "userName": "Alex Johnson",
-        "content": "I was pleasantly surprised by the quality of food offered at the campus dining hall. Great variety and everything tastes fresh. Definitely worth checking out!",
-    },
-    {
-        "title": "Good for a Quick Bite",
-        "rating": 4,
-        "thumbnailUrls": [
-            "https://bruinplate.hh.ucla.edu/img/Home_NewFreshSlide.jpg",
-            "https://i.insider.com/59f2479dcfad392f0d75597b?width=700",
-            "https://s3-media0.fl.yelpcdn.com/bphoto/AH1o0Xj5aS_5LR9yIsSXRg/348s.jpg",
-            "https://i.insider.com/59f2479dcfad392f0d75597d?width=800&format=jpeg&auto=webp",
-        ],
-        "userProfilePhoto": "https://example.com/user2.jpg",
-        "userName": "Bethany Miles",
-        "content": "It's my go-to place when I need something quick and tasty between classes. The snacks section is my favorite.",
-    },
-    {
-        "title": "Average Experience",
-        "rating": 3,
-        "userProfilePhoto": "https://example.com/user3.jpg",
-        "userName": "Charlie Smith",
-        "content": "It's okay if you're in a hurry, but don't expect too much. It gets the job done, though.",
-    },
-    {
-        "title": "Not Great",
-        "rating": 2,
-        "userProfilePhoto": "https://example.com/user4.jpg",
-        "userName": "Dana Lee",
-        "content": "",
-    },
-    {
-        "title": "Disappointed",
-        "rating": 1,
-        "userProfilePhoto": "https://example.com/user5.jpg",
-        "userName": "Evan Wright",
-        "content": "The worst dining experience I've had on campus. I found a hair in my food, and the staff seemed indifferent when I complained. Will not be returning anytime soon.",
-    },
-    {
-        "title": "Excellent Variety",
-        "rating": 5,
-        "thumbnailUrls": [
-            "https://i.insider.com/59f2479dcfad392f0d75597e?width=800&format=jpeg&auto=webp",
-            "https://s3-media0.fl.yelpcdn.com/bphoto/8KxbxoUtL57Qp_C-SNg4tg/348s.jpg",
-            "https://i.insider.com/59f2479ccfad392f0d755979?width=600&format=jpeg&auto=webp",
-        ],
-        "userProfilePhoto": "https://example.com/user6.jpg",
-        "userName": "Fiona Graham",
-        "content": "The campus dining hall has a fantastic variety of foods to choose from. Whether you're vegan, vegetarian, or a meat-lover, there's something for everyone. Highly recommend the vegan options!",
-    },
-    {
-        "title": "Great for Vegetarians",
-        "rating": 4.5,
-        "thumbnailUrls": [],
-        "userProfilePhoto": "https://example.com/user7.jpg",
-        "userName": "George Huang",
-        "content": "As a vegetarian, it's often hard to find good options on campus. However, the dining hall has a great selection that doesn't disappoint. The veggie burgers are a must-try!",
-    },
-    {
-        "title": "Mac and Cheese",
-        "rating": 4,
-        "thumbnailUrls": [],
-        "userProfilePhoto": "https://example.com/user7.jpg",
-        "userName": "Jesse",
-        "content": "The mac and cheese slaps"
-    }
-]
-
-restaurant_hours2 = {
-    "Breakfast": {"start": "08:00", "end": "11:00"},
-    "Lunch": {"start": "12:00", "end": "14:00"},
-    "Dinner": {"start": "18:00", "end": "20:00"},
-    "Extended": {"start": "21:00", "end": "24:00"},
-}
-
-
 @app.route('/api/userImage', methods=['GET'])
 def get_userImage():
     if 'id' in session:
-        print("In session")
         db_connection = dbConnect()
         try:
             with db_connection.cursor() as cursor:
                 sql = "SELECT User_PFP FROM BB_User WHERE User_ID = %s"
                 cursor.execute(sql, (session.get('id'),))
                 info = cursor.fetchone()
-                print(info)
                 userPFP = {
                     "imageURL": info[0],
                     "loggedIn": "true"
                 }
         finally:
             db_connection.close()
-        print("sent user image")
+
     else:
         userPFP = {
             "imageURL": "",
             "loggedIn": "false"
         }
-        print("sent default image")
 
-    print(userPFP)
     return jsonify(userPFP)
 
 @app.route('/api/restaurantInfo/<restaurantName>', methods=['GET'])
@@ -271,7 +163,6 @@ def get_hours(restaurantName):
             restaurant_hours["Lunch"] = {"start": times[2], "end": times[3]}
             restaurant_hours["Dinner"] = {"start": times[4], "end": times[5]}
 
-            print (times[6])
             if times[6] != "0":
                 restaurant_hours["Extended Dinner"] = {"start": times[6], "end": times[7]}
 
@@ -279,14 +170,14 @@ def get_hours(restaurantName):
         db_connection.close()
     return jsonify(restaurant_hours)
 
-@app.route('/api/reviews', methods=['GET'])
-def get_reviews():
-    restaurantID = 2
+@app.route('/api/reviews/<restaurantName>', methods=['GET'])
+def get_reviews(restaurantName):
+    restaurantID = getRestaurantID(restaurantName)
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
             sql = (
-                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID FROM BB_Review r "
+                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name FROM BB_Review r "
                 "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s")
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchall()
@@ -297,21 +188,34 @@ def get_reviews():
                 sql2 = ("SELECT Image_URL FROM `BB_Images` WHERE Review_ID = %s")
                 cursor.execute(sql2, (reviewID,))
                 info2 = cursor.fetchall()
-                print(info2)
 
                 photos = []
                 for image in info2:
                     photos.append(image)
+                userName = row[3] + " " + row[6]
                 reviewData.append(
                     {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
-                     "userName": row[3], "content": row[4]})
+                     "userName": userName, "content": row[4]})
     finally:
         db_connection.close()
     return jsonify(reviewData)
 
 @app.route('/api/restaurantImages/<restaurantName>', methods=['GET'])
 def getRestaurantImages(restaurantName):
+    restaurantImages = []
+    restaurantID = getRestaurantID(restaurantName)
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID = BB_Review.Review_ID WHERE BB_DiningID = %s"
+            cursor.execute(sql, (restaurantID))
+            images = cursor.fetchall()
+            for URL in images:
+                restaurantImages.append(URL[0])
+    finally:
+        db_connection.close()
     return jsonify(restaurantImages)
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -324,16 +228,12 @@ def login():
             cursor.execute(sql, (email,))
             row = cursor.fetchall()
             if len(row) == 0:
-                print("Invalid email")
                 message = jsonify({'message': 'User does not exist', 'status': 'failure'}), 404
             elif len(row) > 1:
-                print("Email already registered")
                 message = jsonify({'message': 'Database error, duplicate entry', 'status': 'failure'}), 400
             elif row[0][0] != password:
-                print("Invalid password")
                 message = jsonify({'message': 'Incorrect password', 'status': 'failure'}), 401
             else:
-                print("Logged in successfully")
                 session['id'] = row[0][1]
                 message = jsonify({'message': 'Login successful', 'status': 'success'}), 202
     finally:
@@ -391,10 +291,8 @@ def checkReviewStatus(restaurantName):
             cursor.execute(sql, (userID, diningID,))
             row = cursor.fetchone()
             if len(row) != 0 and row[0] == dateToday:
-                print("User submitted a review today!")
                 message = jsonify({"hasSubmitted": True}), 200
             else:
-                print("User has not reviewed today")
                 message = jsonify({"hasSubmitted": False}), 200
     finally:
         db_connection.close()
@@ -419,8 +317,9 @@ def restaurantResults():
             i = 0
             for entry in results:
                 cursor.execute(sql, (entry[0]))
-                ratings = list(cursor.fetchall()[0])
-                results[i].append(sum(ratings)/len(ratings))
+                ratings = list(cursor.fetchall())
+                ratingValues = [num for (num,) in ratings]
+                results[i].append(sum(ratingValues)/len(ratingValues))
                 i+=1
 
             #Get Image
@@ -436,18 +335,17 @@ def restaurantResults():
     #Organize results into expected JSON structure
     for result in results:
         jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
-    print(jsonResults)
     return jsonify(jsonResults)
 
-@app.route('/api/reviewUpload', methods=['POST'])
-def upload_review():
+@app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
+def upload_review(restaurantName):
     files = request.files.getlist('images')
     imageUrls = []
 
     title = request.form.get('title')
     content = request.form.get('content')
     rating = request.form.get('rating')
-    restaurantID = 2
+    restaurantID = getRestaurantID(restaurantName)
     userID = session.get('id')
     dateToday = date.today()
     message = jsonify({'message': 'Review submission failed', 'status': 'failure'}), 400
@@ -482,7 +380,6 @@ def upload_review():
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
-    print("Popped the session")
     session.pop('id', None)
     return jsonify({"success": True, "message": "You have been logged out successfully."}), 200
 
