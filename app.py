@@ -371,7 +371,7 @@ def restaurantResults():
             for result in info:
                 results.append([result[0], result[1], result[2]])
 
-            #Get star ratings for reiews
+            #Get star ratings for reviews
             sql = "SELECT Review_Rating FROM BB_Review WHERE BB_DiningID = %s;"
             i = 0
             for entry in results:
@@ -379,29 +379,29 @@ def restaurantResults():
                 ratings = list(cursor.fetchall())
                 ratingValues = [num for (num,) in ratings]
                 if (sum(ratingValues) != 0) or (len(ratingValues) != 0):
-                    results[i].append(sum(ratingValues)/len(ratingValues))
+                    results[i].insert(3, (sum(ratingValues)/len(ratingValues)))
+                else:
+                    results[i].insert(3, 0)
                 i+=1
 
             #Get Image
-            sql = "SELECT BB_DiningID, Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID WHERE BB_DiningID = %s ORDER BY Review_Date DESC"
+            sql = "SELECT Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID = BB_Review.Review_ID WHERE BB_DiningID = %s ORDER BY Review_Date DESC"
             i = 0
             for entry in results:
                 cursor.execute(sql, (entry[0]))
-                try:
-                    results[i].append(cursor.fetchone()[1])
-                except:
-                    results[i].append("https://media.istockphoto.com/id/1319101018/vector/restaurant-line-icon.jpg?s=612x612&w=0&k=20&c=jxdSdOZHPYRD4rfEIb4HCln5ief3QDT5ZT2SQXvJEjI=")
-                finally:
-                    i+=1
+                image = cursor.fetchone()
+                if image is not None:
+                    results[i].insert(4,(image))
+                else:
+                    results[i].insert(4, "https://media.istockphoto.com/id/1319101018/vector/restaurant-line-icon.jpg?s=612x612&w=0&k=20&c=jxdSdOZHPYRD4rfEIb4HCln5ief3QDT5ZT2SQXvJEjI=")
+                i+=1
     finally:
         dbConnection.close()
 
     #Organize results into expected JSON structure
     for result in results:
-        try:
-            jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
-        except IndexError:
-            jsonResults.append({"image": "https://media.istockphoto.com/id/1319101018/vector/restaurant-line-icon.jpg?s=612x612&w=0&k=20&c=jxdSdOZHPYRD4rfEIb4HCln5ief3QDT5ZT2SQXvJEjI=", "name": result[1], "review": result[3], "description": result[2]})
+        jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
+
     return jsonify(jsonResults)
 
 userInfo2 = {
