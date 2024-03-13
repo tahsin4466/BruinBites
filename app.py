@@ -368,7 +368,7 @@ def restaurantResults():
                 ratingValues = [num for (num,) in ratings]
                 if (sum(ratingValues) != 0) or (len(ratingValues) != 0):
                     results[i].append(sum(ratingValues)/len(ratingValues))
-                    i+=1
+                i+=1
 
             #Get Image
             sql = "SELECT BB_DiningID, Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID WHERE BB_DiningID = %s ORDER BY Review_Date DESC"
@@ -378,7 +378,7 @@ def restaurantResults():
                 try:
                     results[i].append(cursor.fetchone()[1])
                 except:
-                    results[i].append("https://cdn4.vectorstock.com/i/1000x1000/32/18/dining-icon-vector-8523218.jpg")
+                    results[i].append("https://media.istockphoto.com/id/1319101018/vector/restaurant-line-icon.jpg?s=612x612&w=0&k=20&c=jxdSdOZHPYRD4rfEIb4HCln5ief3QDT5ZT2SQXvJEjI=")
                 finally:
                     i+=1
     finally:
@@ -389,7 +389,7 @@ def restaurantResults():
         try:
             jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
         except IndexError:
-            jsonResults.append({"image": "https://cdn4.vectorstock.com/i/1000x1000/32/18/dining-icon-vector-8523218.jpg", "name": result[1], "review": result[3], "description": result[2]})
+            jsonResults.append({"image": "https://media.istockphoto.com/id/1319101018/vector/restaurant-line-icon.jpg?s=612x612&w=0&k=20&c=jxdSdOZHPYRD4rfEIb4HCln5ief3QDT5ZT2SQXvJEjI=", "name": result[1], "review": result[3], "description": result[2]})
     return jsonify(jsonResults)
 
 @app.route('/api/personalInfo', methods=['GET'])
