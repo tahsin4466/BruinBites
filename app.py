@@ -53,11 +53,7 @@ def getRestaurantID(name):
         db_connection.close()
     return id
 
-userInfo = {
-    "name": "Jane Doe",
-    "email": "janedoe@example.com",
-    "joinDate": "2024-10-10"
-}
+
 
 userReviews = [
   {
@@ -381,10 +377,27 @@ def restaurantResults():
         jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
     return jsonify(jsonResults)
 
+userInfo2 = {
+    "name": "Jane Doe",
+    "email": "janedoe@example.com",
+    "joinDate": "2024-10-10"
+}
 @app.route('/api/personalInfo', methods=['GET'])
 def getPersonalInfo():
     userId = session.get('id')
-    #get the userInfo here (check the top for example and structure)
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT First_Name, Last_Name, Email, Date_Joined FROM `BB_User` WHERE User_ID = %s"
+            cursor.execute(sql, (userId,))
+            info = cursor.fetchone()
+            userInfo = {
+                "name": info[0] + " " + info[1],
+                "email": info[2],
+                "joinDate": info[3]
+            }
+    finally:
+        db_connection.close()
     return jsonify(userInfo)
 
 @app.route('/api/updateProfile', methods=['POST'])
