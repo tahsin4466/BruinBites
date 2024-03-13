@@ -455,12 +455,24 @@ def getPersonalInfo():
 
 @app.route('/api/updateProfile', methods=['POST'])
 def updateProfile():
+    userId = session.get('id')
     file = request.files.get('profilePhoto')
     passwordUpdated = request.form.get('updatedPassword')
     imageUpdated = request.form.get('updatedImage')
+
     if passwordUpdated:
         #UPDATE THIS IF UPDATED
         updatedPassword = request.form.get('password')
+
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                sql = "UPDATE BB_User SET password = %s WHERE User_ID = %s"
+                cursor.execute(sql, (updatedPassword, userId,))
+        finally:
+            db_connection.close()
+
+
     if imageUpdated:
         file_name = f'reviews/{uuid.uuid4()}-{file.filename}'
         s3_client.upload_fileobj(
@@ -471,11 +483,25 @@ def updateProfile():
         #ALSO UPLOAD THIS IF UPDATED
         profilePhotoURL = f'https://{BUCKET_NAME}.s3.amazonaws.com/{file_name}'
 
-    userID = session.get('id')
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                sql = "UPDATE BB_User SET User_PFP = %s WHERE User_ID = %s"
+                cursor.execute(sql, (profilePhotoURL, userId,))
+        finally:
+            db_connection.close()
+
     newFirstName = request.form.get('firstName')
     newLastName = request.form.get('lastName')
     newEmail = request.form.get('email')
-    #do SQL stuff here
+
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "UPDATE BB_User SET First_Name = %s, Last_Name = %s, Email = %s WHERE User_ID = %s"
+            cursor.execute(sql, (newFirstName, newLastName, newEmail, userId,))
+    finally:
+        db_connection.close()
 
     return jsonify({'message': 'Update succeeded', 'status': 'success'}), 200
     #if sql uploading is a failure please do this return instead
