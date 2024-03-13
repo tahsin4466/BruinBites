@@ -59,6 +59,35 @@ userInfo = {
     "joinDate": "2024-10-10"
 }
 
+userReviews = [
+  {
+    "title": "Delicious and Affordable",
+    "rating": 5,
+    "thumbnailUrls": [
+      "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
+      "https://bruinplate.hh.ucla.edu/img/About_Facility1.jpg",
+    ],
+    "userProfilePhoto": "https://example.com/user1.jpg",
+    "userName": "Jane Doe",
+    "content": "I was pleasantly surprised by the quality of food offered at the campus dining hall. Great variety and everything tastes fresh. Definitely worth checking out!",
+    "date": "2024-10-10"
+  },
+  {
+    "title": "Good for a Quick Bite",
+    "rating": 4,
+    "thumbnailUrls": [
+      "https://bruinplate.hh.ucla.edu/img/Home_NewFreshSlide.jpg",
+      "https://i.insider.com/59f2479dcfad392f0d75597b?width=700",
+      "https://s3-media0.fl.yelpcdn.com/bphoto/AH1o0Xj5aS_5LR9yIsSXRg/348s.jpg",
+      "https://i.insider.com/59f2479dcfad392f0d75597d?width=800&format=jpeg&auto=webp",
+    ],
+    "userProfilePhoto": "https://example.com/user2.jpg",
+    "userName": "Jane Doe",
+    "content": "It's my go-to place when I need something quick and tasty between classes. The snacks section is my favorite.",
+    "date": "2024-10-10"
+  }
+];
+
 @app.route('/api/userImage', methods=['GET'])
 def get_userImage():
     if 'id' in session:
@@ -206,6 +235,11 @@ def get_reviews(restaurantName):
     finally:
         db_connection.close()
     return jsonify(reviewData)
+
+@app.route('/api/userReviews', methods=['GET'])
+def get_user_reviews():
+    return jsonify(userReviews)
+
 
 @app.route('/api/restaurantImages/<restaurantName>', methods=['GET'])
 def getRestaurantImages(restaurantName):
