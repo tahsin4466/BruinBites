@@ -55,7 +55,8 @@ def getRestaurantID(name):
 
 userInfo = {
     "name": "Jane Doe",
-    "email": "janedoe@example.com"
+    "email": "janedoe@example.com",
+    "joinDate": "2024-10-10"
 }
 
 @app.route('/api/userImage', methods=['GET'])
@@ -290,24 +291,18 @@ def signup():
 
 @app.route('/api/checkReviewStatus/<restaurantName>', methods=['GET'])
 def checkReviewStatus(restaurantName):
-    print("checking review status")
     diningID = getRestaurantID(restaurantName)
-    print(diningID)
     userID = session.get('id')
-    print(userID)
     db_connection = dbConnect()
     dateToday = date.today()
-    print(dateToday)
     try:
         with db_connection.cursor() as cursor:
             sql = "SELECT (Review_Date) FROM BB_Review WHERE User_ID = %s AND BB_DiningID = %s ORDER BY Review_Date DESC"
             cursor.execute(sql, (userID, diningID,))
             row = cursor.fetchone()
             if len(row) != 0 and row[0] == dateToday:
-                print("Has submitted a review today")
                 message = jsonify({"hasSubmitted": True}), 200
             else:
-                print("Has not submitted a review today")
                 message = jsonify({"hasSubmitted": False}), 200
     finally:
         db_connection.close()
@@ -355,29 +350,36 @@ def restaurantResults():
 @app.route('/api/personalInfo', methods=['GET'])
 def getPersonalInfo():
     userId = session.get('id')
+    #get the userInfo here (check the top for example and structure)
     return jsonify(userInfo)
 
 @app.route('/api/updateProfile', methods=['POST'])
 def updateProfile():
-    data = request.get_json()
-    userID = session.get('id')
-    newFirstName = data.get('firstName')
-    newLastName = data.get('lastName')
-    newEmail = data.get('email')
-    passwordUpdated = data.get('updatedPassword')
-    imageUpdated = data.get('updatedImage')
-    print(userID)
-    print(newFirstName)
-    print(newLastName)
-    print(newEmail)
-    print(passwordUpdated)
-    print(imageUpdated)
+    file = request.files.get('profilePhoto')
+    passwordUpdated = request.form.get('updatedPassword')
+    imageUpdated = request.form.get('updatedImage')
     if passwordUpdated:
-        updatedPassword = data.get('password')
-        print(updatedPassword)
-    #put file handling stuff here
+        #UPDATE THIS IF UPDATED
+        updatedPassword = request.form.get('password')
+    if imageUpdated:
+        file_name = f'reviews/{uuid.uuid4()}-{file.filename}'
+        s3_client.upload_fileobj(
+            file,
+            BUCKET_NAME,
+            file_name,
+        )
+        #ALSO UPLOAD THIS IF UPDATED
+        profilePhotoURL = f'https://{BUCKET_NAME}.s3.amazonaws.com/{file_name}'
+
+    userID = session.get('id')
+    newFirstName = request.form.get('firstName')
+    newLastName = request.form.get('lastName')
+    newEmail = request.form.get('email')
+    #do SQL stuff here
 
     return jsonify({'message': 'Update succeeded', 'status': 'success'}), 200
+    #if sql uploading is a failure please do this return instead
+    #return jsonify({'message': 'Update failed', 'status': 'failure'}), 400
 
 @app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
 def uploadReview(restaurantName):

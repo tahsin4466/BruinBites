@@ -90,7 +90,9 @@ const User: React.FC = () => {
 
     // Append booleans to formData as strings (since formData supports string values only)
     formData.append('updatedImage', String(updatedImage));
+    console.log(updatedImage)
     formData.append('updatedPassword', String(updatedPassword));
+    console.log(updatedPassword)
 
     try {
       const response = await fetch('/api/updateProfile', {
