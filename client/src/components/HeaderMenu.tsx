@@ -148,6 +148,9 @@ function ResponsiveAppBar() {
     else if (page === 'Dining') {
       navigate('/search')
     }
+    else if (page == 'My Profile') {
+      navigate('/profile')
+    }
     else{
       navigate(`/${page.toLowerCase()}`); // Assuming the page routes follow the pattern '/<pagename>'
     }
@@ -167,7 +170,7 @@ function ResponsiveAppBar() {
         }
       })
       .catch(error => console.error('Error logging out:', error));
-  } else if (setting === 'Profile') {
+  } else if (setting === 'Settings') {
     console.log('to the profile!!');
     navigate('/profile'); // Invoke navigation to the profile page
   }
@@ -182,7 +185,6 @@ function ResponsiveAppBar() {
           variant="h6"
           noWrap
           component="a"
-          href="#app-bar-with-responsive-menu"
           sx={{
             mr: 2,
             display: { xs: 'none', md: 'flex' },
@@ -236,7 +238,6 @@ function ResponsiveAppBar() {
           variant="h5"
           noWrap
           component="a"
-          href="#app-bar-with-responsive-menu"
           sx={{
             mr: 2,
             display: { xs: 'flex', md: 'none' },

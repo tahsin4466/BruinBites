@@ -1,9 +1,9 @@
-# BruinBites
+# Bruin Bites
 
 ## Overview
-This is a web application that helps UCLA students find the best eats on campus! Users will be able to create an account with UCLA SSO, rate their favorite places and interact with other students' feedback for all dining establishments. Live data will also be pulled from menu.dining.ucla.edu for a one stop place for all dining info.
+Bruin Bites is the ideal website to find the best eats on campus! Sign up with an account, search restaurants and leave reviews for your favourite places! See info about each dining hall (including opening hours, the menu and your fellow Bruins' images) and help out the campus community by sharing your experience on or off the hill
 
-This project is being built using a Flask backend and a React front end with MUI. A MySQL server hosted on AWS will faciliate dynamic data storage and retrieval. It is part of a collaborative project for CS35L - Software Construction.
+This project is built using a Flask backend and a React front end with MUI. A MySQL server hosted on AWS faciliates dynamic data storage and retrieval, alongside a CDN for handling user images. All sensitive info is handled with special care using hashing, SQL best practices and more. It is part of a collaborative project for CS35L - Software Construction.
 
 ## Installation
 NOTE: You MUST have a special `.env` file in order to have access credentials for the MySQL and CDN server. Without it, this application will not run. When you have access to this, place it in the `BruinBites` root directory.

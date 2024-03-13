@@ -1,6 +1,7 @@
+// App.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 
 // Import your page components
 import Home from './pages/Home';
@@ -13,6 +14,7 @@ import Restaurant from './pages/Restaurant';
 // Authentication Context Setup
 interface AuthContextType {
   isAuthenticated: boolean;
+  isLoading: boolean; // Add this line
   login: () => void;
   logout: () => void;
 }
@@ -29,71 +31,89 @@ const useAuth = () => {
 
 interface AuthProviderProps {
   children: ReactNode;
+  navigate: any; // Using any for simplicity, consider specifying a more precise type
 }
 
-const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+const AuthProvider: React.FC<AuthProviderProps> = ({ children, navigate }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = () => setIsAuthenticated(true);
+  const login = () => {
+    setIsAuthenticated(true);
+    navigate('/'); // Navigate to the home page upon login
+  };
   const logout = () => {
     setIsAuthenticated(false);
-    // Call your API to invalidate the session
     axios.post('/api/logout').then(() => {
       console.log("Logged out successfully.");
+      navigate('/login'); // Optionally navigate to login page upon logout
     });
   };
 
   const checkSession = async () => {
+    setIsLoading(true);
     try {
-      const response = await axios.get('/api/session');
-      setIsAuthenticated(response.data.isAuthenticated);
+        const response = await axios.get('/api/session');
+        setIsAuthenticated(response.data.isAuthenticated);
     } catch (error) {
-      console.error('Error checking session:', error);
-      setIsAuthenticated(false);
+        console.error('Error checking session:', error);
+        setIsAuthenticated(false);
     }
-  };
+    setIsLoading(false);
+};
 
-  // Check session on component mount
   useEffect(() => {
     checkSession();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Protected Route Component
 interface ProtectedRouteProps {
   element: JSX.Element;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ element }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth(); // Destructure isLoading here
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Show a loading message or spinner
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
   return element;
 };
 
-// App Component with Routes
+// Component that encapsulates the use of useNavigate and AuthProvider
+const AppWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  return (
+    <AuthProvider navigate={navigate}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/leaderboard" element={<ProtectedRoute element={<Leaderboard />} />} />
+        <Route path="/restaurant/:name" element={<ProtectedRoute element={<Restaurant />} />} />
+        <Route path="/profile" element={<ProtectedRoute element={<User />} />} />
+        <Route path="/search" element={<ProtectedRoute element={<Search />} />} />
+        {/* Define more routes as needed */}
+      </Routes>
+    </AuthProvider>
+  );
+};
+
+// Main App Component with Router
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/leaderboard" element={<ProtectedRoute element={<Leaderboard />} />} />
-          <Route path="/restaurant/:name" element={<ProtectedRoute element={<Restaurant />} />} />
-          <Route path="/profile" element={<ProtectedRoute element={<User />} />} />
-          <Route path="/search" element={<ProtectedRoute element={<Search />} />} />
-          {/* Define more routes as needed */}
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <AppWrapper />
+    </Router>
   );
 };
 

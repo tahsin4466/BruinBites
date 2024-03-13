@@ -7,6 +7,7 @@ from datetime import date
 import re
 import boto3
 import uuid
+import bcrypt
 from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
@@ -51,6 +52,41 @@ def getRestaurantID(name):
     finally:
         db_connection.close()
     return id
+
+userInfo = {
+    "name": "Jane Doe",
+    "email": "janedoe@example.com",
+    "joinDate": "2024-10-10"
+}
+
+userReviews = [
+  {
+    "title": "Delicious and Affordable",
+    "rating": 5,
+    "thumbnailUrls": [
+      "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
+      "https://bruinplate.hh.ucla.edu/img/About_Facility1.jpg",
+    ],
+    "userProfilePhoto": "https://example.com/user1.jpg",
+    "userName": "Jane Doe",
+    "content": "I was pleasantly surprised by the quality of food offered at the campus dining hall. Great variety and everything tastes fresh. Definitely worth checking out!",
+    "date": "2024-10-10"
+  },
+  {
+    "title": "Good for a Quick Bite",
+    "rating": 4,
+    "thumbnailUrls": [
+      "https://bruinplate.hh.ucla.edu/img/Home_NewFreshSlide.jpg",
+      "https://i.insider.com/59f2479dcfad392f0d75597b?width=700",
+      "https://s3-media0.fl.yelpcdn.com/bphoto/AH1o0Xj5aS_5LR9yIsSXRg/348s.jpg",
+      "https://i.insider.com/59f2479dcfad392f0d75597d?width=800&format=jpeg&auto=webp",
+    ],
+    "userProfilePhoto": "https://example.com/user2.jpg",
+    "userName": "Jane Doe",
+    "content": "It's my go-to place when I need something quick and tasty between classes. The snacks section is my favorite.",
+    "date": "2024-10-10"
+  }
+];
 
 @app.route('/api/userImage', methods=['GET'])
 def get_userImage():
@@ -200,6 +236,11 @@ def get_reviews(restaurantName):
         db_connection.close()
     return jsonify(reviewData)
 
+@app.route('/api/userReviews', methods=['GET'])
+def get_user_reviews():
+    return jsonify(userReviews)
+
+
 @app.route('/api/restaurantImages/<restaurantName>', methods=['GET'])
 def getRestaurantImages(restaurantName):
     restaurantImages = []
@@ -220,25 +261,26 @@ def getRestaurantImages(restaurantName):
 def login():
     data = request.get_json()
     email = data.get('email')
-    password = data.get('password')
+    password = data.get('password').encode('utf-8')  # Encode password to bytes
+
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
             sql = "SELECT Password, User_ID FROM `BB_User` WHERE Email = %s"
             cursor.execute(sql, (email,))
-            row = cursor.fetchall()
-            if len(row) == 0:
+            row = cursor.fetchone()  # Assuming email is unique, fetchone is more appropriate
+
+            if row is None:
                 message = jsonify({'message': 'User does not exist', 'status': 'failure'}), 404
-            elif len(row) > 1:
-                message = jsonify({'message': 'Database error, duplicate entry', 'status': 'failure'}), 400
-            elif row[0][0] != password:
+            elif not bcrypt.checkpw(password, row[0].encode('utf-8')):  # Check the hashed password
                 message = jsonify({'message': 'Incorrect password', 'status': 'failure'}), 401
             else:
-                session['id'] = row[0][1]
+                session['id'] = row[1]
                 message = jsonify({'message': 'Login successful', 'status': 'success'}), 202
     finally:
         db_connection.close()
     return message
+
 
 @app.route('/api/signup', methods=['POST'])
 def signup():
@@ -249,56 +291,52 @@ def signup():
     password = data.get('password')
     ID = randint(10000000, 99999999)
     dateToday = date.today()
-    #Regex pattern for valid email
+    # Regex pattern for valid email
     if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
-      message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
-    #Regex patterns for valid First and Last names
+        message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
+    # Regex patterns for valid First and Last names
     elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
-      message = jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+        message = jsonify(
+            {'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
     elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
-      message = jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
+        message = jsonify(
+            {'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
 
-    #Regex pattern for strong password
+    # Regex pattern for strong password
     elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
-      message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
+        message = jsonify(
+            {'message': 'Password must be at least 8 characters long, with a capital and special character',
+             'status': 'failure'}), 400
     else:
-      db_connection = dbConnect()
-      try:
-          with db_connection.cursor() as cursor:
-              sql = "SELECT * FROM `BB_User` WHERE Email = %s"
-              cursor.execute(sql, (email))
-              row = cursor.fetchall()
-              if len(row) > 0:
-                  message = jsonify({'message': 'Email exists', 'status': 'failure'}), 400
-              else:
+        bytePassword = password = data.get('password').encode('utf-8')
+        hashed_password = bcrypt.hashpw(bytePassword, bcrypt.gensalt())  # Hash the password
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                # Check if email already exists...
+                # If not, insert the new user with the hashed password:
                 sql = "INSERT INTO BB_User (User_ID, First_Name, Last_Name, User_PFP, Email, Date_Joined, Password) VALUES (%s, %s, %s, 'https://example.com/user7.jpg', %s, %s, %s)"
-                cursor.execute(sql, (ID, firstName, lastName, email, dateToday, password,))
+                cursor.execute(sql, (ID, firstName, lastName, email, dateToday, hashed_password))
                 db_connection.commit()
                 message = jsonify({'message': 'Sign up successful', 'status': 'success'}), 201
-      finally:
+        finally:
             db_connection.close()
     return message
 
 @app.route('/api/checkReviewStatus/<restaurantName>', methods=['GET'])
 def checkReviewStatus(restaurantName):
-    print("checking review status")
     diningID = getRestaurantID(restaurantName)
-    print(diningID)
     userID = session.get('id')
-    print(userID)
     db_connection = dbConnect()
     dateToday = date.today()
-    print(dateToday)
     try:
         with db_connection.cursor() as cursor:
             sql = "SELECT (Review_Date) FROM BB_Review WHERE User_ID = %s AND BB_DiningID = %s ORDER BY Review_Date DESC"
             cursor.execute(sql, (userID, diningID,))
             row = cursor.fetchone()
             if len(row) != 0 and row[0] == dateToday:
-                print("Has submitted a review today")
                 message = jsonify({"hasSubmitted": True}), 200
             else:
-                print("Has not submitted a review today")
                 message = jsonify({"hasSubmitted": False}), 200
     finally:
         db_connection.close()
@@ -343,6 +381,40 @@ def restaurantResults():
         jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
     return jsonify(jsonResults)
 
+@app.route('/api/personalInfo', methods=['GET'])
+def getPersonalInfo():
+    userId = session.get('id')
+    #get the userInfo here (check the top for example and structure)
+    return jsonify(userInfo)
+
+@app.route('/api/updateProfile', methods=['POST'])
+def updateProfile():
+    file = request.files.get('profilePhoto')
+    passwordUpdated = request.form.get('updatedPassword')
+    imageUpdated = request.form.get('updatedImage')
+    if passwordUpdated:
+        #UPDATE THIS IF UPDATED
+        updatedPassword = request.form.get('password')
+    if imageUpdated:
+        file_name = f'reviews/{uuid.uuid4()}-{file.filename}'
+        s3_client.upload_fileobj(
+            file,
+            BUCKET_NAME,
+            file_name,
+        )
+        #ALSO UPLOAD THIS IF UPDATED
+        profilePhotoURL = f'https://{BUCKET_NAME}.s3.amazonaws.com/{file_name}'
+
+    userID = session.get('id')
+    newFirstName = request.form.get('firstName')
+    newLastName = request.form.get('lastName')
+    newEmail = request.form.get('email')
+    #do SQL stuff here
+
+    return jsonify({'message': 'Update succeeded', 'status': 'success'}), 200
+    #if sql uploading is a failure please do this return instead
+    #return jsonify({'message': 'Update failed', 'status': 'failure'}), 400
+
 @app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
 def uploadReview(restaurantName):
     print("Uploading review...")
@@ -350,17 +422,11 @@ def uploadReview(restaurantName):
     imageUrls = []
 
     title = request.form.get('title')
-    print(title)
     content = request.form.get('content')
-    print(content)
     rating = request.form.get('rating')
-    print(rating)
     restaurantID = getRestaurantID(restaurantName)
-    print(restaurantID)
     userID = session.get('id')
-    print(userID)
     dateToday = date.today()
-    print(dateToday)
     message = jsonify({'message': 'Review submission failed', 'status': 'failure'}), 400
 
     # Upload images to S3 and get their URLs
@@ -412,6 +478,10 @@ def homePage():
 def restaurantPage():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/restaurant/<restaurantName>')
+def restaurantPageSpecific(restaurantName):
+    return send_from_directory(app.static_folder, 'index.html')
+
 @app.route('/login')
 def loginPage():
     return send_from_directory(app.static_folder, 'index.html')
@@ -420,5 +490,13 @@ def loginPage():
 def searchPage():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/profile')
+def userPage():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/profile/<userID>')
+def userViewPage(userID):
+    return send_from_directory(app.static_folder, 'index.html')
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=3000, debug=True)
