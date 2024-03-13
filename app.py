@@ -334,9 +334,12 @@ def checkReviewStatus(restaurantName):
             sql = "SELECT (Review_Date) FROM BB_Review WHERE User_ID = %s AND BB_DiningID = %s ORDER BY Review_Date DESC"
             cursor.execute(sql, (userID, diningID,))
             row = cursor.fetchone()
-            if len(row) != 0 and row[0] == dateToday:
-                message = jsonify({"hasSubmitted": True}), 200
-            else:
+            try:
+                if len(row) != 0 and row[0] == dateToday:
+                    message = jsonify({"hasSubmitted": True}), 200
+                else:
+                    message = jsonify({"hasSubmitted": False}), 200
+            except:
                 message = jsonify({"hasSubmitted": False}), 200
     finally:
         db_connection.close()
@@ -375,7 +378,7 @@ def restaurantResults():
                 try:
                     results[i].append(cursor.fetchone()[1])
                 except:
-                    results[i].append('https://cdn4.vectorstock.com/i/1000x1000/32/18/dining-icon-vector-8523218.jpg')
+                    results[i].append("https://cdn4.vectorstock.com/i/1000x1000/32/18/dining-icon-vector-8523218.jpg")
                 finally:
                     i+=1
     finally:
@@ -383,7 +386,10 @@ def restaurantResults():
 
     #Organize results into expected JSON structure
     for result in results:
-        jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
+        try:
+            jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
+        except IndexError:
+            jsonResults.append({"image": "https://cdn4.vectorstock.com/i/1000x1000/32/18/dining-icon-vector-8523218.jpg", "name": result[1], "review": result[3], "description": result[2]})
     return jsonify(jsonResults)
 
 @app.route('/api/personalInfo', methods=['GET'])
