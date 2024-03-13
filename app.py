@@ -1,3 +1,4 @@
+#Library imports
 from flask import Flask, send_from_directory, jsonify, request, session
 from flask_cors import CORS
 import pymysql
@@ -10,21 +11,23 @@ import uuid
 import bcrypt
 from dotenv import load_dotenv
 
+#Flask configurations
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 secret = os.urandom(24)
 app.config['SECRET_KEY'] = secret
 CORS(app)
-load_dotenv()
 
+#.env variable loading and checkers
+load_dotenv()
 S3_KEY_ID = os.environ.get("S3_KEY_ID")
 S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY")
 RDS_HOST = os.environ.get("RDS_HOST")
 RDS_USER = os.environ.get("RDS_USER")
 RDS_PASSWORD = os.environ.get("RDS_PASSWORD")
-
 if not all([S3_KEY_ID, S3_SECRET_KEY, RDS_HOST, RDS_USER, RDS_PASSWORD]):
     raise ValueError("One or more environment variables are not set.")
 
+#CDN connection object
 s3_client = boto3.client(
     's3',
     aws_access_key_id=S3_KEY_ID,
@@ -33,6 +36,7 @@ s3_client = boto3.client(
 )
 BUCKET_NAME = 'bruinbitescdn'
 
+#Database connection object and function
 def dbConnect():
     return pymysql.connect(
         host=RDS_HOST,
@@ -42,6 +46,7 @@ def dbConnect():
         db="BruinBites"
     )
 
+#Regex checker functions
 def getRestaurantID(name):
     db_connection = dbConnect()
     try:
@@ -53,37 +58,25 @@ def getRestaurantID(name):
         db_connection.close()
     return id
 
+def validName(name):
+    if re.match(r'^[A-Z][a-z]+(?:[ -\'][A-Za-z]+)*$', name) is None:
+        return False
+    else:
+        return True
 
+def validEmail(email):
+    if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
+        return False
+    else:
+        return True
 
-userReviews = [
-  {
-    "title": "Delicious and Affordable",
-    "rating": 5,
-    "thumbnailUrls": [
-      "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
-      "https://bruinplate.hh.ucla.edu/img/About_Facility1.jpg",
-    ],
-    "userProfilePhoto": "https://example.com/user1.jpg",
-    "userName": "Jane Doe",
-    "content": "I was pleasantly surprised by the quality of food offered at the campus dining hall. Great variety and everything tastes fresh. Definitely worth checking out!",
-    "date": "2024-10-10"
-  },
-  {
-    "title": "Good for a Quick Bite",
-    "rating": 4,
-    "thumbnailUrls": [
-      "https://bruinplate.hh.ucla.edu/img/Home_NewFreshSlide.jpg",
-      "https://i.insider.com/59f2479dcfad392f0d75597b?width=700",
-      "https://s3-media0.fl.yelpcdn.com/bphoto/AH1o0Xj5aS_5LR9yIsSXRg/348s.jpg",
-      "https://i.insider.com/59f2479dcfad392f0d75597d?width=800&format=jpeg&auto=webp",
-    ],
-    "userProfilePhoto": "https://example.com/user2.jpg",
-    "userName": "Jane Doe",
-    "content": "It's my go-to place when I need something quick and tasty between classes. The snacks section is my favorite.",
-    "date": "2024-10-10"
-  }
-];
+def validPassword(password):
+    if re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
+        return False
+    else:
+        return True
 
+#API app routes
 @app.route('/api/userImage', methods=['GET'])
 def get_userImage():
     if 'id' in session:
@@ -232,34 +225,6 @@ def get_reviews(restaurantName):
         db_connection.close()
     return jsonify(reviewData)
 
-userReviews2 = [
-  {
-    "title": "Delicious and Affordable",
-    "rating": 5,
-    "thumbnailUrls": [
-      "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
-      "https://bruinplate.hh.ucla.edu/img/About_Facility1.jpg",
-    ],
-    "userProfilePhoto": "https://example.com/user1.jpg",
-    "userName": "Jane Doe",
-    "content": "I was pleasantly surprised by the quality of food offered at the campus dining hall. Great variety and everything tastes fresh. Definitely worth checking out!",
-    "date": "2024-10-10"
-  },
-  {
-    "title": "Good for a Quick Bite",
-    "rating": 4,
-    "thumbnailUrls": [
-      "https://bruinplate.hh.ucla.edu/img/Home_NewFreshSlide.jpg",
-      "https://i.insider.com/59f2479dcfad392f0d75597b?width=700",
-      "https://s3-media0.fl.yelpcdn.com/bphoto/AH1o0Xj5aS_5LR9yIsSXRg/348s.jpg",
-      "https://i.insider.com/59f2479dcfad392f0d75597d?width=800&format=jpeg&auto=webp",
-    ],
-    "userProfilePhoto": "https://example.com/user2.jpg",
-    "userName": "Jane Doe",
-    "content": "It's my go-to place when I need something quick and tasty between classes. The snacks section is my favorite.",
-    "date": "2024-10-10"
-  }
-];
 @app.route('/api/userReviews', methods=['GET'])
 def get_user_reviews():
     userID = session.get('id')
@@ -341,21 +306,19 @@ def signup():
     ID = randint(10000000, 99999999)
     dateToday = date.today()
     # Regex pattern for valid email
-    if re.match(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email) is None:
+    if validEmail(email) is False:
         message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
     # Regex patterns for valid First and Last names
-    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', firstName) is None:
+    elif validPassword(firstName) is False:
         message = jsonify(
             {'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
-    elif re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z]+)*$|^([A-Z][a-z]+(?:[-\'][A-Z][a-z]+)*)+$', lastName) is None:
+    elif validName(lastName) is False:
         message = jsonify(
             {'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
 
     # Regex pattern for strong password
-    elif re.match(r'^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$', password) is None:
-        message = jsonify(
-            {'message': 'Password must be at least 8 characters long, with a capital and special character',
-             'status': 'failure'}), 400
+    elif validPassword(password) is False:
+        message = jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 400
     else:
         bytePassword = password = data.get('password').encode('utf-8')
         hashed_password = bcrypt.hashpw(bytePassword, bcrypt.gensalt())  # Hash the password
@@ -452,13 +415,14 @@ def getPersonalInfo():
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
-            sql = "SELECT First_Name, Last_Name, Email, Date_Joined FROM `BB_User` WHERE User_ID = %s"
+            sql = "SELECT First_Name, Last_Name, Email, Date_Joined, User_PFP FROM `BB_User` WHERE User_ID = %s"
             cursor.execute(sql, (userId,))
             info = cursor.fetchone()
             userInfo = {
                 "name": info[0] + " " + info[1],
                 "email": info[2],
-                "joinDate": info[3]
+                "date": info[3],
+                "userPFP": info[4]
             }
     finally:
         db_connection.close()
@@ -471,12 +435,15 @@ def updateProfile():
     passwordUpdated = request.form.get('updatedPassword')
     imageUpdated = request.form.get('updatedImage')
 
-    if passwordUpdated:
+    if passwordUpdated == "true":
         # Get the new password from the form
-        updatedPassword = request.form.get('password').encode('utf-8')  # Encode the new password to bytes
-
+        updatedPassword = request.form.get('password')
+        if validPassword(updatedPassword) is False:
+            print("Invalid password")
+            return jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 200
         # Hash the new password
-        hashed_password = bcrypt.hashpw(updatedPassword, bcrypt.gensalt())
+        encodedPassword = updatedPassword.encode('utf-8')  # Encode the new password to bytes
+        hashed_password = bcrypt.hashpw(encodedPassword, bcrypt.gensalt())
 
         db_connection = dbConnect()
         try:
@@ -484,10 +451,11 @@ def updateProfile():
                 # Update the hashed password in the database
                 sql = "UPDATE BB_User SET Password = %s WHERE User_ID = %s"
                 cursor.execute(sql, (hashed_password, userId,))
+                db_connection.commit()
         finally:
             db_connection.close()
 
-    if imageUpdated:
+    if imageUpdated == "true":
         file_name = f'reviews/{uuid.uuid4()}-{file.filename}'
         s3_client.upload_fileobj(
             file,
@@ -501,6 +469,7 @@ def updateProfile():
             with db_connection.cursor() as cursor:
                 sql = "UPDATE BB_User SET User_PFP = %s WHERE User_ID = %s"
                 cursor.execute(sql, (profilePhotoURL, userId,))
+                db_connection.commit()
         finally:
             db_connection.close()
 
@@ -508,14 +477,25 @@ def updateProfile():
     newLastName = request.form.get('lastName')
     newEmail = request.form.get('email')
 
+    if validEmail(newEmail) is False:
+        print("Invalid Email")
+        return jsonify({'message': 'Invalid email', 'status': 'failure'}), 200
+    elif validName(newFirstName) is False:
+        print("Invalid First Name")
+        return jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 200
+    elif validName(newLastName) is False:
+        print("Invalid Last Name")
+        return jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 200
+
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:
             sql = "UPDATE BB_User SET First_Name = %s, Last_Name = %s, Email = %s WHERE User_ID = %s"
             cursor.execute(sql, (newFirstName, newLastName, newEmail, userId,))
+            db_connection.commit()
     finally:
         db_connection.close()
-
+    print("Success")
     return jsonify({'message': 'Update succeeded', 'status': 'success'}), 200
 
 @app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
@@ -565,7 +545,6 @@ def logout():
     session.pop('id', None)
     return jsonify({"success": True, "message": "You have been logged out successfully."}), 200
 
-#Page routing
 @app.route('/api/session')
 def check_session():
     if 'id' in session:
@@ -573,6 +552,7 @@ def check_session():
     else:
         return jsonify({'isAuthenticated': False})
 
+#Page routing app routes
 @app.route('/')
 def homePage():
     return send_from_directory(app.static_folder, 'index.html')

@@ -3,7 +3,7 @@ import HeaderMenu from '../components/HeaderMenu';
 import ReviewsListUser from '../components/ReviewListUser';
 import {
   Container, Grid, Avatar, Typography, Button, TextField, Drawer, IconButton, Fab, Box,
-  useMediaQuery, useTheme
+  useMediaQuery, useTheme, Alert, Snackbar
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -12,11 +12,14 @@ const User: React.FC = () => {
   const [firstName, setFirstName] = useState('Loading...');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('Loading...');
+  const [date, setDate] = useState('Loading...');
   const [password, setPassword] = useState('example');
   const [drawerOpen, setDrawerOpen] = useState(false);
   // New state for file upload and preview
   const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>("https://upload.wikimedia.org/wikipedia/commons/5/59/Empty.png?20091205084734");
+  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string>('');
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -52,6 +55,10 @@ const User: React.FC = () => {
         setFirstName(first);
         setLastName(last.join(' ')); // Join the rest back in case there are multiple parts to the last name
         setEmail(data.email);
+        setDate(data.date)
+        if (data.userPFP) {
+          setPreviewUrl(data.userPFP);
+        }
       } catch (error) {
         console.error("Could not fetch user data:", error);
       }
@@ -72,46 +79,67 @@ const User: React.FC = () => {
   };
 
   const handleUpdateInfo = async () => {
-    const formData = new FormData();
+  const formData = new FormData();
 
-    // Determine if the image and password were updated based on whether they are not null/empty
-    const updatedImage = Boolean(file); // true if a file was selected
-    const updatedPassword = password !== 'example' && password.trim() !== ''; // Assuming 'example' is your default or placeholder value
+  const updatedImage = Boolean(file);
+  const updatedPassword = password !== 'example' && password.trim() !== '';
 
-    formData.append('firstName', firstName);
-    formData.append('lastName', lastName);
-    formData.append('email', email);
-    if (updatedPassword) {
-        formData.append('password', password);
+  formData.append('firstName', firstName);
+  formData.append('lastName', lastName);
+  formData.append('email', email);
+  if (updatedPassword) {
+      formData.append('password', password);
+  }
+  if (updatedImage && file) {
+    formData.append('profilePhoto', file, file.name);
+  }
+
+  formData.append('updatedImage', String(updatedImage));
+  formData.append('updatedPassword', String(updatedPassword));
+
+  try {
+    const response = await fetch('/api/updateProfile', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    if (updatedImage && file) {
-      formData.append('profilePhoto', file, file.name);
-    }
 
-    // Append booleans to formData as strings (since formData supports string values only)
-    formData.append('updatedImage', String(updatedImage));
-    console.log(updatedImage)
-    formData.append('updatedPassword', String(updatedPassword));
-    console.log(updatedPassword)
+    const result = await response.json();
 
-    try {
-      const response = await fetch('/api/updateProfile', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const result = await response.json();
+    // Check if the update was successful or failed based on the backend response
+    if (result.status === 'failure') {
+      // Display the error message from the backend in the Snackbar
+      setSnackbarMessage(result.message);
+      setOpenSnackbar(true);
+    } else {
+      // Assuming the update was successful, handle the success case (e.g., show a success message)
       console.log('Success:', result);
-      // Handle success response, such as updating UI or showing a success message
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      // Handle errors, such as displaying an error message to the user
+      // You can also use the Snackbar to show a success message
+      setSnackbarMessage('Profile updated successfully!');
+      setOpenSnackbar(true);
+      // Reset the form or navigate the user elsewhere as needed
     }
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    // Display a generic error message or handle the error specifically
+    setSnackbarMessage('Error updating profile. Please try again.');
+    setOpenSnackbar(true);
+  }
 };
+
+
+  const handleCloseSnackbar = (
+    event?: React.SyntheticEvent<any, Event> | Event,
+    reason?: string
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
 
   return (
         <>
@@ -212,6 +240,11 @@ const User: React.FC = () => {
             </Grid>
           )}
         </Grid>
+        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
       </Container>
     </>
 
