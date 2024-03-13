@@ -131,7 +131,7 @@ const User: React.FC = () => {
               <Typography variant="body1" align="center" gutterBottom sx={{ fontFamily: 'monospace' }}>
                 {email}
               </Typography>
-
+              <Typography variant="h5">‎</Typography>
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
                 <Grid item xs={6}>
                   <TextField
@@ -207,6 +207,7 @@ const User: React.FC = () => {
 
           {!isMobile && (
             <Grid item xs={12} md={8}>
+              <Typography align="center" style={{fontWeight: 'bold', fontFamily: 'monospace'}} variant="h5">My Past Reviews</Typography>
               <ReviewsListUser />
             </Grid>
           )}

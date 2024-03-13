@@ -53,11 +53,7 @@ def getRestaurantID(name):
         db_connection.close()
     return id
 
-userInfo = {
-    "name": "Jane Doe",
-    "email": "janedoe@example.com",
-    "joinDate": "2024-10-10"
-}
+
 
 userReviews = [
   {
@@ -236,8 +232,61 @@ def get_reviews(restaurantName):
         db_connection.close()
     return jsonify(reviewData)
 
+userReviews2 = [
+  {
+    "title": "Delicious and Affordable",
+    "rating": 5,
+    "thumbnailUrls": [
+      "https://portal.housing.ucla.edu/sites/default/files/media/images/Interior%20Greens%20and%20More%20Station%20Seating_square.png",
+      "https://bruinplate.hh.ucla.edu/img/About_Facility1.jpg",
+    ],
+    "userProfilePhoto": "https://example.com/user1.jpg",
+    "userName": "Jane Doe",
+    "content": "I was pleasantly surprised by the quality of food offered at the campus dining hall. Great variety and everything tastes fresh. Definitely worth checking out!",
+    "date": "2024-10-10"
+  },
+  {
+    "title": "Good for a Quick Bite",
+    "rating": 4,
+    "thumbnailUrls": [
+      "https://bruinplate.hh.ucla.edu/img/Home_NewFreshSlide.jpg",
+      "https://i.insider.com/59f2479dcfad392f0d75597b?width=700",
+      "https://s3-media0.fl.yelpcdn.com/bphoto/AH1o0Xj5aS_5LR9yIsSXRg/348s.jpg",
+      "https://i.insider.com/59f2479dcfad392f0d75597d?width=800&format=jpeg&auto=webp",
+    ],
+    "userProfilePhoto": "https://example.com/user2.jpg",
+    "userName": "Jane Doe",
+    "content": "It's my go-to place when I need something quick and tasty between classes. The snacks section is my favorite.",
+    "date": "2024-10-10"
+  }
+];
 @app.route('/api/userReviews', methods=['GET'])
 def get_user_reviews():
+    userID = session.get('id')
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = (
+                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name, r.Review_Date FROM BB_Review r "
+                "JOIN BB_User u ON r.User_ID = u.User_ID WHERE u.User_ID = %s ORDER BY r.Review_Date DESC")
+            cursor.execute(sql, (userID,))
+            info = cursor.fetchall()
+            userReviews = []
+            for row in info:
+                reviewID = row[5]
+                sql2 = ("SELECT Image_URL FROM `BB_Images` WHERE Review_ID = %s")
+                cursor.execute(sql2, (reviewID,))
+                info2 = cursor.fetchall()
+
+                photos = []
+                for image in info2:
+                    photos.append(image)
+                userName = row[3] + " " + row[6]
+                userReviews.append(
+                    {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
+                     "userName": userName, "content": row[4], "date": row[7].strftime("%d/%m/%Y")})
+    finally:
+        db_connection.close()
     return jsonify(userReviews)
 
 
@@ -381,20 +430,52 @@ def restaurantResults():
         jsonResults.append({"image": result[4], "name": result[1], "review": result[3], "description": result[2]})
     return jsonify(jsonResults)
 
+userInfo2 = {
+    "name": "Jane Doe",
+    "email": "janedoe@example.com",
+    "joinDate": "2024-10-10"
+}
 @app.route('/api/personalInfo', methods=['GET'])
 def getPersonalInfo():
     userId = session.get('id')
-    #get the userInfo here (check the top for example and structure)
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT First_Name, Last_Name, Email, Date_Joined FROM `BB_User` WHERE User_ID = %s"
+            cursor.execute(sql, (userId,))
+            info = cursor.fetchone()
+            userInfo = {
+                "name": info[0] + " " + info[1],
+                "email": info[2],
+                "joinDate": info[3]
+            }
+    finally:
+        db_connection.close()
     return jsonify(userInfo)
 
 @app.route('/api/updateProfile', methods=['POST'])
 def updateProfile():
+    userId = session.get('id')
     file = request.files.get('profilePhoto')
     passwordUpdated = request.form.get('updatedPassword')
     imageUpdated = request.form.get('updatedImage')
+
     if passwordUpdated:
-        #UPDATE THIS IF UPDATED
-        updatedPassword = request.form.get('password')
+        # Get the new password from the form
+        updatedPassword = request.form.get('password').encode('utf-8')  # Encode the new password to bytes
+
+        # Hash the new password
+        hashed_password = bcrypt.hashpw(updatedPassword, bcrypt.gensalt())
+
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                # Update the hashed password in the database
+                sql = "UPDATE BB_User SET Password = %s WHERE User_ID = %s"
+                cursor.execute(sql, (hashed_password, userId,))
+        finally:
+            db_connection.close()
+
     if imageUpdated:
         file_name = f'reviews/{uuid.uuid4()}-{file.filename}'
         s3_client.upload_fileobj(
@@ -402,18 +483,29 @@ def updateProfile():
             BUCKET_NAME,
             file_name,
         )
-        #ALSO UPLOAD THIS IF UPDATED
         profilePhotoURL = f'https://{BUCKET_NAME}.s3.amazonaws.com/{file_name}'
 
-    userID = session.get('id')
+        db_connection = dbConnect()
+        try:
+            with db_connection.cursor() as cursor:
+                sql = "UPDATE BB_User SET User_PFP = %s WHERE User_ID = %s"
+                cursor.execute(sql, (profilePhotoURL, userId,))
+        finally:
+            db_connection.close()
+
     newFirstName = request.form.get('firstName')
     newLastName = request.form.get('lastName')
     newEmail = request.form.get('email')
-    #do SQL stuff here
+
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "UPDATE BB_User SET First_Name = %s, Last_Name = %s, Email = %s WHERE User_ID = %s"
+            cursor.execute(sql, (newFirstName, newLastName, newEmail, userId,))
+    finally:
+        db_connection.close()
 
     return jsonify({'message': 'Update succeeded', 'status': 'success'}), 200
-    #if sql uploading is a failure please do this return instead
-    #return jsonify({'message': 'Update failed', 'status': 'failure'}), 400
 
 @app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
 def uploadReview(restaurantName):
