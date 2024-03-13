@@ -363,16 +363,21 @@ def restaurantResults():
                 cursor.execute(sql, (entry[0]))
                 ratings = list(cursor.fetchall())
                 ratingValues = [num for (num,) in ratings]
-                results[i].append(sum(ratingValues)/len(ratingValues))
-                i+=1
+                if (sum(ratingValues) != 0) or (len(ratingValues) != 0):
+                    results[i].append(sum(ratingValues)/len(ratingValues))
+                    i+=1
 
             #Get Image
             sql = "SELECT BB_DiningID, Image_URL FROM BB_Images INNER JOIN BB_Review ON BB_Images.Review_ID WHERE BB_DiningID = %s ORDER BY Review_Date DESC"
             i = 0
             for entry in results:
                 cursor.execute(sql, (entry[0]))
-                results[i].append(cursor.fetchone()[1])
-                i+=1
+                try:
+                    results[i].append(cursor.fetchone()[1])
+                except:
+                    results[i].append('https://cdn4.vectorstock.com/i/1000x1000/32/18/dining-icon-vector-8523218.jpg')
+                finally:
+                    i+=1
     finally:
         dbConnection.close()
 
