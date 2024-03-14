@@ -337,7 +337,7 @@ def signup():
     if validEmail(email) is False:
         message = jsonify({'message': 'Invalid email', 'status': 'failure'}), 400
     # Regex patterns for valid First and Last names
-    elif validPassword(firstName) is False:
+    elif validName(firstName) is False:
         message = jsonify(
             {'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 400
     elif validName(lastName) is False:

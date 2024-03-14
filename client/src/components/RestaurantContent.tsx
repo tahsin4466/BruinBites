@@ -206,10 +206,29 @@ const CombinedContent: React.FC<RestaurantContentProps> = ({ name }) => {
   };
 
   const handleReviewImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (event.target.files && event.target.files.length > 0) {
-          const file = event.target.files[0];
-          setReviewImageFiles(prevFiles => [...prevFiles, file]);
-      }
+    if (event.target.files && event.target.files.length > 0) {
+      const filesArray = Array.from(event.target.files);
+      setReviewImageFiles(prevFiles => [...prevFiles, ...filesArray]);
+
+      // Cleanup old URLs before setting new ones
+      cleanupImageUrls();
+
+      const filesUrls = filesArray.map(file => URL.createObjectURL(file));
+      setReviewImageUrls(prevUrls => [...prevUrls, ...filesUrls]);
+    }
+  };
+
+  useEffect(() => {
+  // Your existing useEffect logic here...
+
+  return () => {
+    // Cleanup URLs on component unmount
+    cleanupImageUrls();
+  };
+}, []);
+
+  const cleanupImageUrls = () => {
+    reviewImageUrls.forEach(url => URL.revokeObjectURL(url));
   };
 
  const handleReviewSubmit = async (event: React.FormEvent) => {
