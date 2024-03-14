@@ -185,7 +185,9 @@ def get_hours(restaurantName):
             if times[0] != "0":
                 restaurant_hours["Breakfast"] = {"start": times[0], "end": times[1]}
 
-            restaurant_hours["Lunch"] = {"start": times[2], "end": times[3]}
+            if times[2] != "0":
+                restaurant_hours["Lunch"] = {"start": times[2], "end": times[3]}
+
             restaurant_hours["Dinner"] = {"start": times[4], "end": times[5]}
 
             if times[6] != "0":
