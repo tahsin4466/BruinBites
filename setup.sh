@@ -2,7 +2,16 @@
 
 # 1. Install Python dependencies from requirements.txt
 echo "Installing Python dependencies..."
-pip3 install -r requirements.txt
+if pip3 install -r requirements.txt; then
+  echo "Dependencies installed successfully using pip3."
+else
+  echo "pip3 not found, trying with pip..."
+  if pip install -r requirements.txt; then
+    echo "Dependencies installed successfully using pip."
+  else
+    echo "Failed to install dependencies using both pip and pip3."
+  fi
+fi
 
 # 2. Change directory to the 'client'
 echo "Changing directory to client..."
@@ -22,4 +31,4 @@ cd ..
 
 # 6. Run the Python application
 echo "Running Python application..."
-python3 app.p
+python3 app.py
