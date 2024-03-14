@@ -10,6 +10,7 @@ import Leaderboard from './pages/Leaderboard';
 import Search from './pages/Search';
 import User from './pages/User';
 import Restaurant from './pages/Restaurant';
+import SearchedUser from './pages/SearchedUser'
 
 // Authentication Context Setup
 interface AuthContextType {
@@ -101,6 +102,7 @@ const AppWrapper: React.FC = () => {
         <Route path="/leaderboard" element={<ProtectedRoute element={<Leaderboard />} />} />
         <Route path="/restaurant/:name" element={<ProtectedRoute element={<Restaurant />} />} />
         <Route path="/profile" element={<ProtectedRoute element={<User />} />} />
+        <Route path="/profile/:id" element={<ProtectedRoute element={<SearchedUser />} />} />
         <Route path="/search" element={<ProtectedRoute element={<Search />} />} />
         {/* Define more routes as needed */}
       </Routes>

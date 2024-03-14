@@ -202,7 +202,7 @@ def get_reviews(restaurantName):
     try:
         with db_connection.cursor() as cursor:
             sql = (
-                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name, r.Review_Date FROM BB_Review r "
+                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name, r.Review_Date, u.User_ID FROM BB_Review r "
                 "JOIN BB_User u ON r.User_ID = u.User_ID WHERE r.BB_DiningID = %s ORDER BY r.Review_Date DESC")
             cursor.execute(sql, (restaurantID,))
             info = cursor.fetchall()
@@ -220,7 +220,7 @@ def get_reviews(restaurantName):
                 userName = row[3] + " " + row[6]
                 reviewData.append(
                     {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
-                     "userName": userName, "content": row[4], "date": row[7].strftime("%m/%d/%Y")})
+                     "userName": userName, "content": row[4], "date": row[7].strftime("%m/%d/%Y"), "userID": row[8]})
     finally:
         db_connection.close()
     return jsonify(reviewData)
@@ -232,7 +232,7 @@ def get_user_reviews():
     try:
         with db_connection.cursor() as cursor:
             sql = (
-                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name, r.Review_Date FROM BB_Review r "
+                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name, r.Review_Date, u.User_ID FROM BB_Review r "
                 "JOIN BB_User u ON r.User_ID = u.User_ID WHERE u.User_ID = %s ORDER BY r.Review_Date DESC")
             cursor.execute(sql, (userID,))
             info = cursor.fetchall()
@@ -249,7 +249,35 @@ def get_user_reviews():
                 userName = row[3] + " " + row[6]
                 userReviews.append(
                     {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
-                     "userName": userName, "content": row[4], "date": row[7].strftime("%m/%d/%Y")})
+                     "userName": userName, "content": row[4], "date": row[7].strftime("%m/%d/%Y"), "userID": row[8]})
+    finally:
+        db_connection.close()
+    return jsonify(userReviews)
+
+@app.route('/api/searchedReviews/<userID>', methods=['GET'])
+def get_searched_reviews(userID):
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = (
+                "SELECT r.Review_Title, r.Review_Rating, u.User_PFP, u.First_Name, r.Review_Comment, r.Review_ID, u.Last_Name, r.Review_Date, u.User_ID FROM BB_Review r "
+                "JOIN BB_User u ON r.User_ID = u.User_ID WHERE u.User_ID = %s ORDER BY r.Review_Date DESC")
+            cursor.execute(sql, (userID,))
+            info = cursor.fetchall()
+            userReviews = []
+            for row in info:
+                reviewID = row[5]
+                sql2 = ("SELECT Image_URL FROM `BB_Images` WHERE Review_ID = %s")
+                cursor.execute(sql2, (reviewID,))
+                info2 = cursor.fetchall()
+
+                photos = []
+                for image in info2:
+                    photos.append(image)
+                userName = row[3] + " " + row[6]
+                userReviews.append(
+                    {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
+                     "userName": userName, "content": row[4], "date": row[7].strftime("%m/%d/%Y"), "userID": row[8]})
     finally:
         db_connection.close()
     return jsonify(userReviews)
@@ -412,6 +440,24 @@ userInfo2 = {
 @app.route('/api/personalInfo', methods=['GET'])
 def getPersonalInfo():
     userId = session.get('id')
+    db_connection = dbConnect()
+    try:
+        with db_connection.cursor() as cursor:
+            sql = "SELECT First_Name, Last_Name, Email, Date_Joined, User_PFP FROM `BB_User` WHERE User_ID = %s"
+            cursor.execute(sql, (userId,))
+            info = cursor.fetchone()
+            userInfo = {
+                "name": info[0] + " " + info[1],
+                "email": info[2],
+                "date": info[3].strftime("%m/%d/%Y"),
+                "userPFP": info[4]
+            }
+    finally:
+        db_connection.close()
+    return jsonify(userInfo)
+
+@app.route('/api/searchedInfo/<userId>', methods=['GET'])
+def getSearchedInfo(userId):
     db_connection = dbConnect()
     try:
         with db_connection.cursor() as cursor:

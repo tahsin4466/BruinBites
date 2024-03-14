@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Card, CardContent, Typography, Avatar, Rating, Modal, Grid, IconButton } from '@mui/material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { Link as RouterLink } from 'react-router-dom';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -14,6 +15,7 @@ export interface Review {
   userName: string;
   content: string;
   date: string;
+  userID: number;
 }
 
 const ImageGalleryModal: React.FC<{ images: string[]; open: boolean; onClose: () => void }> = ({
@@ -57,9 +59,11 @@ const ReviewBox: React.FC<{ review: Review }> = ({ review }) => {
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Avatar src={review.userProfilePhoto} sx={{ mr: 2 }} />
+          <RouterLink to={`/profile/${review.userID}`} style={{ textDecoration: 'none' }}>
           <Typography variant="h5" component="div" sx={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#333' }}>
             {review.userName}
           </Typography>
+          </RouterLink>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Rating name="read-only" value={review.rating} readOnly />
