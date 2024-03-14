@@ -159,6 +159,9 @@ const User: React.FC = () => {
               <Typography variant="body1" align="center" gutterBottom sx={{ fontFamily: 'monospace' }}>
                 {email}
               </Typography>
+              <Typography variant="body2" align="center" gutterBottom sx={{ fontFamily: 'monospace' }}>
+                Member since {date}
+              </Typography>
               <Typography variant="h5">‎</Typography>
               <Grid container spacing={2} sx={{ marginBottom: 2 }}>
                 <Grid item xs={6}>

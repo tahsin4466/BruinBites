@@ -220,7 +220,7 @@ def get_reviews(restaurantName):
                 userName = row[3] + " " + row[6]
                 reviewData.append(
                     {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
-                     "userName": userName, "content": row[4], "date": row[7].strftime("%d/%m/%Y")})
+                     "userName": userName, "content": row[4], "date": row[7].strftime("%m/%d/%Y")})
     finally:
         db_connection.close()
     return jsonify(reviewData)
@@ -249,7 +249,7 @@ def get_user_reviews():
                 userName = row[3] + " " + row[6]
                 userReviews.append(
                     {"title": row[0], "rating": row[1], "thumbnailUrls": photos, "userProfilePhoto": row[2],
-                     "userName": userName, "content": row[4], "date": row[7].strftime("%d/%m/%Y")})
+                     "userName": userName, "content": row[4], "date": row[7].strftime("%m/%d/%Y")})
     finally:
         db_connection.close()
     return jsonify(userReviews)
@@ -421,7 +421,7 @@ def getPersonalInfo():
             userInfo = {
                 "name": info[0] + " " + info[1],
                 "email": info[2],
-                "date": info[3],
+                "date": info[3].strftime("%m/%d/%Y"),
                 "userPFP": info[4]
             }
     finally:
@@ -439,7 +439,6 @@ def updateProfile():
         # Get the new password from the form
         updatedPassword = request.form.get('password')
         if validPassword(updatedPassword) is False:
-            print("Invalid password")
             return jsonify({'message': 'Password must be at least 8 characters long, with a capital and special character', 'status': 'failure'}), 200
         # Hash the new password
         encodedPassword = updatedPassword.encode('utf-8')  # Encode the new password to bytes
@@ -478,13 +477,10 @@ def updateProfile():
     newEmail = request.form.get('email')
 
     if validEmail(newEmail) is False:
-        print("Invalid Email")
         return jsonify({'message': 'Invalid email', 'status': 'failure'}), 200
     elif validName(newFirstName) is False:
-        print("Invalid First Name")
         return jsonify({'message': 'First name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 200
     elif validName(newLastName) is False:
-        print("Invalid Last Name")
         return jsonify({'message': 'Last name must be properly formatted (capital, no numbers etc.)', 'status': 'failure'}), 200
 
     db_connection = dbConnect()
@@ -495,12 +491,10 @@ def updateProfile():
             db_connection.commit()
     finally:
         db_connection.close()
-    print("Success")
     return jsonify({'message': 'Update succeeded', 'status': 'success'}), 200
 
 @app.route('/api/reviewUpload/<restaurantName>', methods=['POST'])
 def uploadReview(restaurantName):
-    print("Uploading review...")
     files = request.files.getlist('images')
     imageUrls = []
 
