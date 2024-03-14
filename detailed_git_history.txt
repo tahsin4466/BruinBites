@@ -1,0 +1,161 @@
+0d768bc - gaanaj, 4 minutes ago : Update README.md
+67d3d52 - Tahsin Ahmed, 14 minutes ago : Merge remote-tracking branch 'origin/main'
+2b3ef2f - Tahsin Ahmed, 14 minutes ago : Added startup.sh to run the program
+84fcef1 - achang2004, 19 minutes ago : Add case where pip3 fails fall back to pip
+f49f883 - achang2004, 34 minutes ago : Create setup.sh
+6e8b90b - Tahsin Ahmed, 39 minutes ago : get hours fix
+58bf393 - Tahsin Ahmed, 62 minutes ago : Fix image preview in review submission box
+e91b68e - Tahsin Ahmed, 2 hours ago : Last minute user search up feature addition
+e661003 - Tahsin Ahmed, 3 hours ago : Date debugging, more bug fixes
+e1cbda2 - Tahsin Ahmed, 10 hours ago : Result data debugging, regex debugging
+d8f3796 - Tahsin Ahmed, 11 hours ago : Fully functional user profile, including updating and input validation
+b086b3a - Tahsin Ahmed, 22 hours ago : Merge pull request #27 from tahsin4466/debugging-3
+68f5aa2 - Tahsin Ahmed, 22 hours ago : Bug fixes on user review getting, user page style adjusstments
+697c508 - Tahsin Ahmed, 22 hours ago : Merge pull request #26 from tahsin4466/achang2004-patch-1
+cad2d14 - Tahsin Ahmed, 22 hours ago : Further restaurant and results debugging, and database test data purge
+a01ab79 - achang2004, 23 hours ago : Create appTEST.py
+a3ca132 - Tahsin Ahmed, 24 hours ago : Complete implementation of search error handling, midway implementation of restaurant page debugging
+9d5cec0 - Tahsin Ahmed, 24 hours ago : Midway implementation of search error handling
+65e037b - PrincDani, 24 hours ago : Merge pull request #24 from tahsin4466/home-page
+f994fbf - PrincDani, 24 hours ago : Merge branch 'main' into home-page
+a46d89e - Tahsin Ahmed, 24 hours ago : Update README.md
+08ce751 - PrincDani, 25 hours ago : Added a main photo for the home page, sub-descriptions for our main focuses, and a giant sign up button at the bottom!
+d18648e - Tahsin Ahmed, 25 hours ago : Addition of backend variable getting for user page
+48ebe5e - Tahsin Ahmed, 25 hours ago : Merge pull request #23 from tahsin4466/user-page
+3f818c6 - Tahsin Ahmed, 25 hours ago : Addition of backend variable getting for user page
+f8a221f - PrincDani, 2 days ago : added date to reviews on ReviewListUser.tsx created 90% of the home page with title, main topics, and a signup now!!
+379826e - Tahsin Ahmed, 2 days ago : Addition of user info reading, midway implementation of user profile updating
+ada0d89 - Tahsin Ahmed, 2 days ago : Various bug fixes, including user drawer fixes, search logout bug and header menu routing
+0d8be88 - Tahsin Ahmed, 2 days ago : Bug fixes ported from incompatible debugging branch
+2a6bd61 - Tahsin Ahmed, 2 days ago : Merge fixes for password hashing
+176f0aa - Tahsin Ahmed, 2 days ago : Merge remote-tracking branch 'origin/main'
+883c122 - Tahsin Ahmed, 2 days ago : Fixed functionality from merge of ui-3
+29e544c - achang2004, 2 days ago : Delete client/src/components/LoginSheetTest.tsx
+53a346f - achang2004, 2 days ago : Delete google-auth.html
+88967e3 - achang2004, 2 days ago : Delete google-auth.js
+3f6b27d - achang2004, 2 days ago : Delete password-hashing.py
+8991c63 - achang2004, 2 days ago : added hashing to login and signup
+81b7537 - PrincDani, 2 days ago : Merge pull request #21 from tahsin4466/ui-3
+2597c7d - PrincDani, 2 days ago : Merge branch 'main' into ui-3
+f80b73a - PrincDani, 2 days ago : created a separate ReviewListUser.tsx that will work in tandem with the User.tsx
+c530aad - achang2004, 2 days ago : accidentally changed lol
+f834d88 - achang2004, 2 days ago : Update LoginSheet.tsx
+78e983e - achang2004, 2 days ago : password hashing function w/ example
+351d28f - achang2004, 2 days ago : Update requirements.txt
+b542b1b - Tahsin Ahmed, 2 days ago : Fixed data ordering, review submission validation, added dates to reviews alongside full names
+87dc401 - Tahsin Ahmed, 2 days ago : Implementation of image getting, carousel fixes and header adjustments
+97454f6 - Tahsin Ahmed, 2 days ago : Merge pull request #18 from tahsin4466/search
+4b609e3 - Tahsin Ahmed, 2 days ago : Merge pull request #17 from tahsin4466/database2.1
+d47289a - Tahsin Ahmed, 2 days ago : Implementation of restaurantID state and data fetchers for restaurant info, fully functional search
+7d85d83 - Tahsin Ahmed, 2 days ago : Implementation of fuzzy searching to filter restaurants
+160f021 - Tahsin Ahmed, 2 days ago : Functional data fetching API call for search results on Flask backend
+30a8087 - PrincDani, 3 days ago : attempted to create a jason object of user info to allow proper api calls to change user info
+6d9d655 - gaanaj, 3 days ago : Merge branch 'main' into database2.1
+2e4d66b - gaanaj, 3 days ago : fixed get_hours to not show breakfast/extended if not open for then
+1dc143b - Tahsin Ahmed, 3 days ago : Stylistic changes, removal of navbar search
+0fcd40b - gaanaj, 3 days ago : fixed get_reviews to grab images from BB_Images table
+0c80b6f - PrincDani, 3 days ago : extra padding for the end of the change user info grid
+0bfbea2 - Tahsin Ahmed, 3 days ago : Merge error fixes, backend routing fix
+c736662 - Tahsin Ahmed, 3 days ago : Merge pull request #16 from tahsin4466/ui
+c2521b9 - Tahsin Ahmed, 3 days ago : Merge branch 'main' into ui
+2514e0d - PrincDani, 3 days ago : improved the formatting of the user info change area
+1ca472f - Tahsin Ahmed, 3 days ago : Indentation error fix
+42beb78 - Tahsin Ahmed, 3 days ago : Merge pull request #15 from tahsin4466/database
+52c9ebd - Tahsin Ahmed, 3 days ago : Merge branch 'main' into database
+6004cfb - PrincDani, 3 days ago : added buttons for changing user info
+655e88c - PrincDani, 3 days ago : took away the dropdown for the search page results... also, implemented 70% of the user page like name, photo, and a list of reviews.
+78ffeb4 - Tahsin Ahmed, 3 days ago : Merge pull request #14 from tahsin4466/routing
+0bf1fce - Tahsin Ahmed, 3 days ago : Merge branch 'main' into routing
+4d73c8f - Tahsin Ahmed, 3 days ago : Inclusion of requirements.txt for easy library installation. README updtes
+6539d44 - Tahsin Ahmed, 3 days ago : Remove .env from tracking
+a264684 - Tahsin Ahmed, 3 days ago : Security measure implementations, key roation, ec2 instance rotation, password changes and sensitive info abstraction
+785eac1 - Tahsin Ahmed, 4 days ago : Implemented review submission, TODO check issues
+623301e - Tahsin Ahmed, 5 days ago : Login text field validation
+2ec02fa - gaanaj, 5 days ago : get_menu function
+bbbd563 - Tahsin Ahmed, 6 days ago : Session Implementation, including route protection and time out as well as session validity checking
+f99d85f - Tahsin Ahmed, 6 days ago : Implementation of login, including checking for valid email and password
+ff99ae1 - Tahsin Ahmed, 6 days ago : Implementation of sign up, including user email checking
+c21aae1 - Tahsin Ahmed, 6 days ago : Merge pull request #10 from tahsin4466/routing
+4cd39c9 - Tahsin Ahmed, 6 days ago : Menu interface fixes to reflect database structure.
+8850ac6 - gaanaj, 6 days ago : wrote get_reviews function
+2c5227e - PrincDani, 7 days ago : added "user profile" to the user profile page
+6c9044a - Tahsin Ahmed, 7 days ago : Fixed routing
+1cdba35 - gaanaj, 7 days ago : wrote get_hours function to talk to database
+48efb37 - PrincDani, 7 days ago : made the header bar fixed throughout the page
+608cb58 - PrincDani, 7 days ago : made a non-functional dropdown... need to fix
+c26a4c7 - PrincDani, 7 days ago : made the result boxes work for an arbitrary size of restaurants and restaurant photos.
+fab1ff4 - Tahsin Ahmed, 7 days ago : Update README.md
+8c08bdb - PrincDani, 7 days ago : scroll bar added to search page
+ef2ae2b - Tahsin Ahmed, 7 days ago : Merge pull request #8 from tahsin4466/sql
+0014328 - Tahsin Ahmed, 7 days ago : Integration of basic AWS communication
+d93020e - Tahsin Ahmed, 9 days ago : Google OAuth login fix with traditional login.
+310506b - Tahsin Ahmed, 9 days ago : Merge pull request #6 from tahsin4466/google-auth
+1b2e99b - Tahsin Ahmed, 9 days ago : Merge branch 'main' into google-auth
+a8c23da - Tahsin Ahmed, 9 days ago : Merge pull request #5 from tahsin4466/api
+ec65291 - Tahsin Ahmed, 9 days ago : Login page API implementation
+fd10c1b - PrincDani, 9 days ago : added image template to the results of the search bar
+694efeb - PrincDani, 9 days ago : created template results for the search bar
+52057f0 - achang2004, 9 days ago : Update LoginSheetTest.tsx
+a038152 - achang2004, 9 days ago : Update LoginSheetTest.tsx
+d2f7d2e - achang2004, 9 days ago : Rename home.tsx to Home.tsx
+bd10649 - achang2004, 9 days ago : validate only ucla emails
+50e2594 - achang2004, 9 days ago : Create LoginSheetTest.tsx
+7e24bb1 - Tahsin Ahmed, 9 days ago : Login page changes
+41213d2 - achang2004, 9 days ago : Create LoginSheetTest.tsx
+1f351b8 - PrincDani, 9 days ago : created a search bar for the search page
+9fc3404 - achang2004, 9 days ago : Update LoginSheet.tsx
+bb0ba80 - achang2004, 9 days ago : Create google-auth.tsx
+90e675f - achang2004, 9 days ago : Update LoginSheet.tsx
+05748a6 - Tahsin Ahmed, 9 days ago : Removal of preliminary API testing bloat from App.tsx
+987fb31 - achang2004, 9 days ago : Update google-auth.js
+a7a95de - achang2004, 9 days ago : Update google-auth.html
+490d171 - Tahsin Ahmed, 9 days ago : Implementation of Flask Endpoints and React API Calls for the Restaurant Page
+77be41d - achang2004, 9 days ago : Add files via upload
+73df85e - achang2004, 9 days ago : Add files via upload
+0736050 - Tahsin Ahmed, 9 days ago : Favicon and styling updates
+77167e5 - Tahsin Ahmed, 9 days ago : Minor routing change for Restaurant page
+a65dae1 - PrincDani, 10 days ago : Merge pull request #4 from tahsin4466/back-end
+c75fd9b - Tahsin Ahmed, 10 days ago : Merge branch 'main' into back-end
+1f4f751 - Tahsin Ahmed, 10 days ago : Update README.md
+5d269b1 - PrincDani, 10 days ago : made the entire header bar have functional buttons that reroute to the necessary pages
+13205f2 - Tahsin Ahmed, 10 days ago : Merge pull request #3 from tahsin4466/ui
+f542621 - Tahsin Ahmed, 10 days ago : finished restaurant page
+e7e5a9a - Tahsin Ahmed, 10 days ago : Inclusion of Opening hours interface, including dynamic behaviour with system time to determine if restaurants are open
+e31858a - PrincDani, 10 days ago : made the logout button functionally reroute to the login page
+71d6daf - Tahsin Ahmed, 10 days ago : Wrap up of review submission box, complete with image upload and preview
+eb6d079 - Tahsin Ahmed, 10 days ago : Merge pull request #2 from tahsin4466/ui
+c70f1b4 - Tahsin Ahmed, 11 days ago : Addition of Restaurant info components, including image gallery menu and review system
+cefea3c - PrincDani, 11 days ago :  page routing implementation work...
+6eeafdd - PrincDani, 11 days ago : the start of page routing implementation
+0471406 - Tahsin Ahmed, 2 weeks ago : Work on Restaurant.tsx, including layout and styling
+ea84241 - PrincDani, 2 weeks ago : attempted to make the login page functional
+3333e54 - PrincDani, 2 weeks ago : Added the api for flask and react to communicate and request data.
+e167f12 - Tahsin Ahmed, 2 weeks ago : Update README.md
+d919a2c - PrincDani, 2 weeks ago : comment: I said hell0
+7b7e812 - Tahsin Ahmed, 3 weeks ago : Merge pull request #1 from tahsin4466/ui-skeleton
+1dfa824 - Tahsin Ahmed, 3 weeks ago : Addition of log in and sign up screen, main pages skeleton setup
+e1d7f88 - Tahsin Ahmed, 4 weeks ago : Addition of Header component, organized project structure
+08e60ee - Tahsin Ahmed, 4 weeks ago : Addition of Header component, organized project structure
+a6233a8 - Tahsin Ahmed, 4 weeks ago : Update README.md
+df6c350 - Tahsin Ahmed, 4 weeks ago : Transition of JS components to TypeScript.
+f9f5455 - Tahsin Ahmed, 4 weeks ago : Merge remote-tracking branch 'origin/main'
+f0d6e97 - Tahsin Ahmed, 4 weeks ago : Transition of JS components to TypeScript.
+be852d9 - achang2004, 4 weeks ago : Update README.md
+850035a - achang2004, 4 weeks ago : Update README.md
+ea97916 - Tahsin Ahmed, 4 weeks ago : Update README.md
+506d284 - Tahsin Ahmed, 5 weeks ago : Update README.md
+a2a6688 - Tahsin Ahmed, 5 weeks ago : Merge remote-tracking branch 'origin/main'
+ffb3835 - Tahsin Ahmed, 5 weeks ago : Addition of MUI component and test button
+b731319 - Tahsin Ahmed, 5 weeks ago : Update README.md
+2b103f6 - Tahsin Ahmed, 5 weeks ago : Update README.md
+3ceb444 - Tahsin Ahmed, 5 weeks ago : Removed main.html template.
+b5064f6 - Tahsin Ahmed, 5 weeks ago : Setup react environment and node.js server
+5aa2442 - Tahsin Ahmed, 5 weeks ago : Merge remote-tracking branch 'origin/main'
+fde40c6 - Tahsin Ahmed, 5 weeks ago : Setup react environment and node.js server
+d8beace - Tahsin Ahmed, 5 weeks ago : Update README.md
+405ef0c - Tahsin Ahmed, 5 weeks ago : Update README.md
+876ff93 - Tahsin Ahmed, 5 weeks ago : Initial README.md
+8b6d811 - Tahsin Ahmed, 5 weeks ago : Templates folder and main.html setup for basic landing page.
+9f3d126 - Tahsin Ahmed, 5 weeks ago : Updated Flask Skeleton
+12ac893 - Tahsin Ahmed, 5 weeks ago : Create Flask Skeleton
+b294a9a - Tahsin Ahmed, 5 weeks ago : Initial commit
