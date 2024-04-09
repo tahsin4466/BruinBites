@@ -12,6 +12,8 @@ Make sure you have the latest version of Python installed (preferabbly 3.12+). Y
 
 For a quick installation of the project and it's dependencies, you can run the `setup.sh` script in the root `BruinBites` directory. After that, run `startup.sh` to build the React files and start the Flask server.
 
+NOTE: The AWS backend for this project is no longer operational, so the site will not function properly. This project is up for showcase and archival purposes.
+
 ## Manual Installation and Startup
 If for any reason the quick installation script does not work, you can perform the installation manually.
 
